@@ -35,7 +35,7 @@
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Chart.js -->
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -65,7 +65,7 @@
           <div class="flex items-center gap-2">
             <h1 class="text-base font-bold tracking-tight text-white">Chuvadi</h1>
             <span class="text-xs italic text-brand-300 font-serif tracking-normal">a way of life</span>
-            <span class="text-[10px] font-mono font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-1.5 py-0.2 rounded" id="appHeaderVersion">v1.3.0</span>
+            <span class="text-[10px] font-mono font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-1.5 py-0.2 rounded" id="appHeaderVersion">v1.4.0</span>
           </div>
           <p id="headerDate" class="text-xs text-slate-400">Loading date...</p>
         </div>
@@ -85,11 +85,11 @@
     <!-- TAB 1: DASHBOARD (COMMAND CENTER) -->
     <section id="tab-dashboard" class="tab-page space-y-6">
       
-      <!-- Net Liquid & Financial Snapshot Card -->
+      <!-- Financial Snapshot Card -->
       <div class="bg-gradient-to-br from-dark-card to-slate-900 border border-dark-border rounded-2xl p-5 shadow-xl">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Total Liquid Net Balance</span>
+            <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Total Available Net Balance</span>
             <div id="dashTotalLiquid" class="text-3xl font-extrabold text-white tracking-tight mt-0.5">₹0</div>
           </div>
           <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
@@ -99,16 +99,16 @@
 
         <div class="grid grid-cols-3 gap-2 pt-3 border-t border-dark-border/60">
           <div class="bg-dark-bg/60 p-2.5 rounded-xl border border-dark-border/40">
-            <span class="text-[11px] text-slate-400 block">Total Assets</span>
+            <span class="text-[11px] text-slate-400 block">Total Assets & PF</span>
             <span id="dashTotalAssets" class="text-sm font-bold text-indigo-300">₹0</span>
           </div>
           <div class="bg-dark-bg/60 p-2.5 rounded-xl border border-dark-border/40">
-            <span class="text-[11px] text-slate-400 block">Loan Liabilities</span>
-            <span id="dashTotalDebt" class="text-sm font-bold text-rose-400">₹0</span>
+            <span class="text-[11px] text-slate-400 block">Total Receivables</span>
+            <span id="dashTotalReceivables" class="text-sm font-bold text-emerald-400">₹0</span>
           </div>
           <div class="bg-dark-bg/60 p-2.5 rounded-xl border border-dark-border/40">
-            <span class="text-[11px] text-slate-400 block">Receivables</span>
-            <span id="dashTotalReceivables" class="text-sm font-bold text-emerald-400">₹0</span>
+            <span class="text-[11px] text-slate-400 block">This Month's Spend</span>
+            <span id="dashMonthSpend" class="text-sm font-bold text-rose-400">₹0</span>
           </div>
         </div>
       </div>
@@ -121,7 +121,7 @@
         <div id="urgentAlertsList" class="space-y-2"></div>
       </div>
 
-      <!-- Quick Action Grid -->
+      <!-- Quick Actions Grid -->
       <div>
         <h2 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3">Quick Actions</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -139,18 +139,18 @@
             <span class="text-xs font-semibold text-white">Add Income</span>
           </button>
 
+          <button onclick="openTransactionModal('TRANSFER')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-semibold text-white">Transfer Funds</span>
+          </button>
+
           <button onclick="openTransactionModal('MULTI_TRANSFER')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
             <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
               <i data-lucide="split" class="w-5 h-5"></i>
             </div>
             <span class="text-xs font-semibold text-white">Salary Split (1→N)</span>
-          </button>
-
-          <button onclick="openQuickFuelModal()" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
-              <i data-lucide="fuel" class="w-5 h-5"></i>
-            </div>
-            <span class="text-xs font-semibold text-white">Log Fuel</span>
           </button>
         </div>
       </div>
@@ -177,7 +177,7 @@
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-lg font-bold text-white">Accounts & Ledger</h2>
-          <p class="text-xs text-slate-400">Tap any account card to view its Passbook statement</p>
+          <p class="text-xs text-slate-400">Tap an account to open its Passbook & statement</p>
         </div>
         <div class="flex gap-2">
           <button onclick="openAddAccountModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
@@ -186,14 +186,14 @@
         </div>
       </div>
 
-      <!-- Account Buckets (Clickable Passbooks) -->
-      <div class="space-y-3">
+      <!-- Compact Bank Accounts List -->
+      <div class="space-y-2.5">
         <div class="flex justify-between items-center">
-          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Bank Accounts & Assets (Passbook View)</span>
-          <span class="text-[11px] text-slate-500 italic">Tap card to view statement</span>
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Accounts & Assets</span>
+          <span class="text-[10px] text-slate-500 italic">Tap to open Passbook</span>
         </div>
-        <div id="accountsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Loaded dynamically -->
+        <div id="accountsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- Loaded dynamically (compact cards) -->
         </div>
       </div>
 
@@ -202,7 +202,7 @@
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-2">
             <i data-lucide="users" class="w-4 h-4 text-brand-400"></i>
-            <h3 class="text-sm font-bold text-white">Receivables & Payables</h3>
+            <h3 class="text-sm font-bold text-white">Receivables & Payables (People)</h3>
           </div>
           <button onclick="openEntityModal()" class="text-xs text-brand-400 font-semibold hover:underline">+ Add Person</button>
         </div>
@@ -225,7 +225,6 @@
               <option value="INCOME">Income</option>
               <option value="TRANSFER">Single Transfers</option>
               <option value="MULTI_TRANSFER">Salary / Split Transfers</option>
-              <option value="LOAN_EMI">Loan EMIs</option>
             </select>
           </div>
         </div>
@@ -235,168 +234,54 @@
       </div>
     </section>
 
-    <!-- TAB 3: LOANS & HOMESAVER HUB -->
-    <section id="tab-loans" class="tab-page space-y-6 hidden">
+    <!-- TAB 3: EXPENSE REPORTS (NEW MODULE) -->
+    <section id="tab-reports" class="tab-page space-y-6 hidden">
       <div class="flex justify-between items-center">
         <div>
-          <h2 class="text-lg font-bold text-white">Standard Chartered Homesaver Hub</h2>
-          <p class="text-xs text-slate-400">MOA Homesaver A/c 42705645432 • Live Statement & Projections[cite: 1]</p>
+          <h2 class="text-lg font-bold text-white">Expense Analytics</h2>
+          <p class="text-xs text-slate-400">Category breakdown and spending trends</p>
         </div>
-        <button onclick="syncStandCharteredLoanToFirebase()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync Reconciled Data
-        </button>
-      </div>
-
-      <!-- Standard Chartered Homesaver Reconciled Overview Card -->
-      <div class="bg-dark-card border border-dark-border rounded-2xl p-5 space-y-4 shadow-xl">
-        <div class="flex justify-between items-start border-b border-dark-border/60 pb-3">
-          <div>
-            <span class="text-xs font-bold text-white flex items-center gap-1.5">
-              <i data-lucide="home" class="w-4 h-4 text-brand-400"></i>
-              Standard Chartered MOA Homesaver[cite: 1]
-            </span>
-            <p class="text-[11px] text-slate-400 mt-0.5">Loan A/c: 42705645432 • Linked CASA: 42117157747 • 7.35% p.a.[cite: 1]</p>
-          </div>
-          <div class="text-right">
-            <span class="text-xs text-slate-400 block">Effective Principal O/S</span>
-            <span class="text-base font-extrabold text-rose-400">₹35,27,960.77[cite: 1]</span>
-          </div>
-        </div>
-
-        <!-- 4-Metric Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div class="bg-dark-bg p-3 rounded-xl border border-dark-border">
-            <span class="text-slate-400 block text-[10px] uppercase">Scheduled Loan Limit</span>
-            <span class="font-bold text-white text-sm">₹37,69,232.01[cite: 1]</span>
-          </div>
-          <div class="bg-dark-bg p-3 rounded-xl border border-dark-border">
-            <span class="text-slate-400 block text-[10px] uppercase">Net Loan Liability</span>
-            <span class="font-bold text-white text-sm">₹37,18,100.99[cite: 1]</span>
-          </div>
-          <div class="bg-dark-bg p-3 rounded-xl border border-dark-border">
-            <span class="text-slate-400 block text-[10px] uppercase">Interest Saved (Offset)</span>
-            <span class="font-bold text-emerald-400 text-sm">₹51,131.02[cite: 1]</span>
-          </div>
-          <div class="bg-dark-bg p-3 rounded-xl border border-dark-border">
-            <span class="text-slate-400 block text-[10px] uppercase">Withdrawable Surplus</span>
-            <span class="font-bold text-brand-300 text-sm">₹83,611.00 CR[cite: 1]</span>
-          </div>
-        </div>
-
-        <!-- Progress & Tenure Bar -->
-        <div class="space-y-1.5 pt-1">
-          <div class="flex justify-between text-[11px] text-slate-400">
-            <span>40 EMIs Paid (₹13,00,134.22 Total)[cite: 1]</span>
-            <span>204 Months Remaining (5 Months Saved)[cite: 1]</span>
-          </div>
-          <div class="w-full bg-dark-bg h-2 rounded-full overflow-hidden border border-dark-border">
-            <div class="bg-gradient-to-r from-brand-600 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 16.4%"></div>
-          </div>
-        </div>
-
-        <!-- Statement / Projection Tab Switcher -->
-        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-dark-border/60">
-          <button onclick="showHomeLoanTab('statement')" id="hlStatementTabBtn" class="py-2 rounded-xl text-xs font-bold bg-brand-600/20 text-brand-300 border border-brand-500/30">
-            Live Statement (Past Transactions)[cite: 1]
-          </button>
-          <button onclick="showHomeLoanTab('projection')" id="hlProjectionTabBtn" class="py-2 rounded-xl text-xs font-semibold text-slate-400 bg-dark-bg border border-dark-border">
-            Future Projected Schedule
-          </button>
-        </div>
-
-        <!-- 1. Actual Statement View (Past Transactions) -->
-        <div id="hlPastStatementView" class="space-y-2">
-          <div class="overflow-x-auto no-scrollbar max-h-72">
-            <table class="w-full text-left text-[11px] text-slate-300">
-              <thead class="bg-dark-bg text-slate-400 uppercase sticky top-0">
-                <tr>
-                  <th class="p-2">Date</th>
-                  <th class="p-2">Description</th>
-                  <th class="p-2 text-right">Debit (₹)</th>
-                  <th class="p-2 text-right">Credit (₹)</th>
-                  <th class="p-2 text-right">Ledger Balance (₹)</th>
-                </tr>
-              </thead>
-              <tbody id="hlPastStatementBody" class="divide-y divide-dark-border/40">
-                <!-- Dynamically populated with June-Aug 2026 data -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 2. Future Projection Schedule View -->
-        <div id="hlProjectionView" class="space-y-2 hidden">
-          <div class="overflow-x-auto no-scrollbar max-h-72">
-            <table class="w-full text-left text-[11px] text-slate-300">
-              <thead class="bg-dark-bg text-slate-400 uppercase sticky top-0">
-                <tr>
-                  <th class="p-2">Month</th>
-                  <th class="p-2 text-right">EMI (₹)</th>
-                  <th class="p-2 text-right">Interest (₹)</th>
-                  <th class="p-2 text-right">Principal (₹)</th>
-                  <th class="p-2 text-right">Remaining Outstanding (₹)</th>
-                </tr>
-              </thead>
-              <tbody id="hlProjectionBody" class="divide-y divide-dark-border/40">
-                <!-- Dynamically populated with 204 month future amortization schedule -->
-              </tbody>
-            </table>
-          </div>
+        <div>
+          <select id="reportPeriodSelect" onchange="renderExpenseReports()" class="bg-dark-card border border-dark-border rounded-xl px-3 py-1.5 text-xs text-brand-300 font-semibold focus:outline-none">
+            <option value="THIS_MONTH">This Month</option>
+            <option value="LAST_MONTH">Last Month</option>
+            <option value="THIS_YEAR">This Year</option>
+            <option value="ALL_TIME">All Time</option>
+          </select>
         </div>
       </div>
 
-      <!-- Other Loans Container (Car Loan, etc.) -->
-      <div class="space-y-3">
-        <div class="flex justify-between items-center">
-          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Other Active Loans</span>
-          <button onclick="openLoanModal()" class="text-xs text-brand-400 font-semibold hover:underline">+ Add Another Loan</button>
+      <!-- KPI Overview Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-dark-card border border-dark-border p-4 rounded-2xl">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold block">Total Spent in Period</span>
+          <span id="repTotalSpent" class="text-2xl font-extrabold text-rose-400 mt-0.5 block">₹0</span>
         </div>
-        <div id="loansList" class="space-y-3">
-          <!-- Loaded dynamically -->
+        <div class="bg-dark-card border border-dark-border p-4 rounded-2xl">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold block">Daily Average Spend</span>
+          <span id="repDailyAverage" class="text-2xl font-extrabold text-amber-400 mt-0.5 block">₹0</span>
+        </div>
+        <div class="bg-dark-card border border-dark-border p-4 rounded-2xl">
+          <span class="text-[10px] text-slate-400 uppercase font-semibold block">Top Spending Category</span>
+          <span id="repTopCategory" class="text-lg font-extrabold text-brand-300 mt-1 block truncate">-</span>
         </div>
       </div>
 
-      <!-- Prepayment Simulator Tool -->
-      <div class="bg-dark-card border border-dark-border rounded-2xl p-5 space-y-4 shadow-xl">
-        <div class="flex items-center gap-2 border-b border-dark-border/60 pb-3">
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-            <i data-lucide="calculator" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-white">Prepayment & Offset Simulator</h3>
-            <p class="text-xs text-slate-400">Simulate extra part-payments or homesaver parking</p>
+      <!-- Chart & Breakdown Section -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+        <!-- Doughnut Chart -->
+        <div class="bg-dark-card border border-dark-border p-5 rounded-2xl flex flex-col items-center justify-center min-h-[300px]">
+          <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3 self-start">Category Distribution</h3>
+          <div class="w-full max-w-[240px] aspect-square relative flex items-center justify-center">
+            <canvas id="expenseChart"></canvas>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-          <div>
-            <label class="block text-slate-400 mb-1">Select Loan</label>
-            <select id="simLoanSelect" onchange="runPrepaymentSim()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2 text-white focus:outline-none focus:border-brand-500">
-              <!-- Populated dynamically -->
-            </select>
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">One-Time Part-Payment / Parked Fund (₹)</label>
-            <input type="number" id="simLumpSum" value="100000" oninput="runPrepaymentSim()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 100000" />
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Monthly Step-Up (₹)</label>
-            <input type="number" id="simMonthlyStepUp" value="2500" oninput="runPrepaymentSim()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 2500" />
-          </div>
-        </div>
-
-        <div id="simResultsBox" class="bg-dark-bg/80 border border-brand-500/30 rounded-xl p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div>
-            <span class="text-[11px] text-slate-400 block">Tenure Reduced By</span>
-            <span id="simMonthsSaved" class="text-base font-extrabold text-emerald-400">0 Months</span>
-          </div>
-          <div>
-            <span class="text-[11px] text-slate-400 block">Interest Saved</span>
-            <span id="simInterestSaved" class="text-base font-extrabold text-emerald-400">₹0</span>
-          </div>
-          <div class="col-span-2 sm:col-span-1">
-            <span class="text-[11px] text-slate-400 block">New Payoff Date</span>
-            <span id="simNewPayoffDate" class="text-sm font-semibold text-brand-300">-</span>
+        <!-- Detailed Breakdown Bars -->
+        <div class="bg-dark-card border border-dark-border p-5 rounded-2xl space-y-4">
+          <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400">Category Breakdown</h3>
+          <div id="repCategoryList" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar">
+            <!-- Dynamically populated category progress items -->
           </div>
         </div>
       </div>
@@ -493,9 +378,9 @@
         <span class="text-[10px] text-slate-500 mt-6 font-medium">Assistant</span>
       </div>
 
-      <button onclick="switchTab('loans')" id="nav-loans" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
-        <i data-lucide="landmark" class="w-5 h-5 mb-1"></i>
-        <span class="text-[10px]">Loans</span>
+      <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
+        <i data-lucide="pie-chart" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]">Reports</span>
       </button>
 
       <button onclick="switchTab('garage')" id="nav-garage" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
@@ -546,7 +431,7 @@
 
   <!-- ================= MODALS CONTAINER ================= -->
 
-  <!-- 1. Transaction Action Popup Modal (Click on any transaction) -->
+  <!-- 1. Transaction Action Popup Modal -->
   <div id="txnActionModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-start">
@@ -569,7 +454,7 @@
           <span id="actTxnDate" class="text-slate-200"></span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-slate-400">Routing / Account:</span>
+          <span class="text-slate-400">Account / Route:</span>
           <span id="actTxnAccount" class="text-slate-200 text-right truncate max-w-[180px]"></span>
         </div>
         <div id="actTxnNotesRow" class="flex justify-between items-center">
@@ -607,12 +492,11 @@
         <input type="hidden" id="txnEditId" value="" />
         <input type="hidden" id="txnTypeInput" value="EXPENSE" />
 
-        <div class="grid grid-cols-5 gap-1 p-1 bg-dark-bg rounded-xl border border-dark-border text-[11px]">
+        <div class="grid grid-cols-4 gap-1 p-1 bg-dark-bg rounded-xl border border-dark-border text-[11px]">
           <button type="button" onclick="setTxnType('EXPENSE')" id="typeBtnExpense" class="py-1.5 rounded-lg font-semibold text-center transition bg-rose-500/20 text-rose-300">Expense</button>
           <button type="button" onclick="setTxnType('INCOME')" id="typeBtnIncome" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">Income</button>
           <button type="button" onclick="setTxnType('TRANSFER')" id="typeBtnTransfer" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">Transfer</button>
           <button type="button" onclick="setTxnType('MULTI_TRANSFER')" id="typeBtnMultiTransfer" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">Split(1→N)</button>
-          <button type="button" onclick="setTxnType('LOAN_EMI')" id="typeBtnEmi" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">EMI</button>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
@@ -622,7 +506,7 @@
           </div>
           <div>
             <label class="block text-slate-400 mb-1" id="amountLabel">Total Amount (₹)</label>
-            <input type="number" step="0.01" id="txnAmount" required oninput="handleEmiSplitCalculation()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold text-sm focus:outline-none focus:border-brand-500" placeholder="0.00" />
+            <input type="number" step="0.01" id="txnAmount" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold text-sm focus:outline-none focus:border-brand-500" placeholder="0.00" />
           </div>
         </div>
 
@@ -643,7 +527,7 @@
               <span class="font-bold text-white text-xs flex items-center gap-1.5">
                 <i data-lucide="split" class="w-3.5 h-3.5 text-purple-400"></i> Salary Distribution / Multi-Contra
               </span>
-              <p class="text-[10px] text-slate-400">Distribute funds into multiple target accounts</p>
+              <p class="text-[10px] text-slate-400">Distribute funds into multiple accounts / receivables</p>
             </div>
             <button type="button" onclick="addMultiTransferRow()" class="px-2 py-1 bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 border border-purple-500/40 rounded-lg text-[10px] font-semibold flex items-center gap-1">
               <i data-lucide="plus" class="w-3 h-3"></i> Add Target
@@ -673,31 +557,6 @@
           </datalist>
         </div>
 
-        <!-- EMI Split Container -->
-        <div id="emiSplitContainer" class="hidden space-y-2 p-3 bg-dark-bg/80 rounded-xl border border-brand-500/30">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-white">EMI Principal / Interest Split</span>
-            <label class="flex items-center gap-1.5 text-[11px] text-slate-300">
-              <input type="checkbox" id="emiOverrideToggle" onchange="toggleEmiOverride()" class="rounded border-dark-border" />
-              Manual Override
-            </label>
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Select Loan</label>
-            <select id="txnLoanId" onchange="handleEmiSplitCalculation()" class="w-full bg-dark-card border border-dark-border rounded-xl p-2 text-white"></select>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-slate-400 mb-0.5">Principal Paid (₹)</label>
-              <input type="number" step="0.01" id="emiPrincipalAmount" readonly class="w-full bg-dark-card border border-dark-border rounded-xl p-2 text-emerald-400 font-bold" />
-            </div>
-            <div>
-              <label class="block text-slate-400 mb-0.5">Interest Paid (₹)</label>
-              <input type="number" step="0.01" id="emiInterestAmount" readonly class="w-full bg-dark-card border border-dark-border rounded-xl p-2 text-rose-400 font-bold" />
-            </div>
-          </div>
-        </div>
-
         <div>
           <label class="block text-slate-400 mb-1">Notes / Description</label>
           <input type="text" id="txnNotes" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="Optional notes" />
@@ -710,7 +569,7 @@
     </div>
   </div>
 
-  <!-- 3. Account Passbook Modal -->
+  <!-- 3. Account Passbook Modal (Contains inside Edit & Delete buttons) -->
   <div id="passbookModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-dark-border/60 pb-3">
@@ -720,15 +579,21 @@
           </div>
           <div>
             <h3 id="pbAccountName" class="text-base font-bold text-white">Account Passbook</h3>
-            <p id="pbAccountPurpose" class="text-xs text-slate-400">Detailed Statement & History</p>
+            <p id="pbAccountPurpose" class="text-xs text-slate-400">Statement & History</p>
           </div>
         </div>
         <div class="text-right flex flex-col items-end gap-1">
           <span class="text-[10px] text-slate-400 uppercase font-semibold">Current Balance</span>
           <span id="pbAccountBalance" class="text-lg font-extrabold text-emerald-400 leading-none">₹0</span>
-          <button id="pbEditAccountBtn" class="mt-1 text-[11px] text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1">
-            <i data-lucide="edit" class="w-3 h-3"></i> Edit Account
-          </button>
+          <!-- Inside Edit & Delete Actions -->
+          <div class="flex gap-2 mt-1">
+            <button id="pbEditAccountBtn" class="text-[11px] text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1">
+              <i data-lucide="edit" class="w-3 h-3"></i> Edit
+            </button>
+            <button id="pbDeleteAccountBtn" class="text-[11px] text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1">
+              <i data-lucide="trash" class="w-3 h-3"></i> Delete
+            </button>
+          </div>
         </div>
       </div>
 
@@ -747,7 +612,7 @@
       <div class="flex justify-between items-center">
         <div>
           <h3 id="accountModalTitle" class="text-base font-bold text-white">Add Financial Account</h3>
-          <p id="accountModalSubtitle" class="text-[11px] text-slate-400">Configure bank account, investment or asset</p>
+          <p id="accountModalSubtitle" class="text-[11px] text-slate-400">Configure bank account, investment, asset or receivable</p>
         </div>
         <button onclick="closeModal('accountModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -758,7 +623,8 @@
         <div>
           <label class="block text-slate-400 mb-1">Account Type</label>
           <select id="accType" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
-            <option value="LIQUID_BANK">Liquid Bank Account / Cash Wallet</option>
+            <option value="BANK_ACCOUNT">Bank Account / Wallet</option>
+            <option value="RECEIVABLE_ACCOUNT">Receivable Account</option>
             <option value="INVESTMENT_PF">Retirement & Long-Term (EPF / PPF / MFs)</option>
             <option value="FIXED_ASSET">Fixed Asset (House Share / Vehicle Equity)</option>
           </select>
@@ -766,12 +632,12 @@
 
         <div>
           <label class="block text-slate-400 mb-1">Account / Asset Name</label>
-          <input type="text" id="accName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. HDFC Salary, ICICI Spends, Company EPF" />
+          <input type="text" id="accName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. HDFC Salary, ICICI Spends, Rental Receivable" />
         </div>
 
         <div>
           <label class="block text-slate-400 mb-1">Purpose / Tag</label>
-          <input type="text" id="accPurpose" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Salary & EMIs, Daily Spends, Retirement" />
+          <input type="text" id="accPurpose" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Salary Inflow, Daily Spends, Investment" />
         </div>
 
         <div>
@@ -786,81 +652,7 @@
     </div>
   </div>
 
-  <!-- 5. Loan Modal -->
-  <div id="loanModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
-      <div class="flex justify-between items-center">
-        <h3 class="text-base font-bold text-white">Add Loan Account</h3>
-        <button onclick="closeModal('loanModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <form id="loanForm" onsubmit="saveLoan(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-400 mb-1">Loan Name</label>
-          <input type="text" id="loanName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. XUV 3XO Car Loan" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1">Lender / Bank</label>
-            <input type="text" id="loanLender" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. HDFC Bank" />
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Loan Type</label>
-            <select id="loanType" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
-              <option value="CAR">Car / Vehicle Loan</option>
-              <option value="HOME">Home Loan</option>
-              <option value="PERSONAL">Personal / Other</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1">Sanctioned Amount (₹)</label>
-            <input type="number" step="0.01" id="loanSanctioned" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 800000" />
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Outstanding Principal (₹)</label>
-            <input type="number" step="0.01" id="loanOutstanding" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="e.g. 540000" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1">Annual Interest Rate (%)</label>
-            <input type="number" step="0.01" id="loanInterestRate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 8.75" />
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Monthly EMI (₹)</label>
-            <input type="number" step="0.01" id="loanEmi" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="e.g. 16500" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1">Start Date</label>
-            <input type="date" id="loanStartDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Tenure (Months)</label>
-            <input type="number" id="loanTenureMonths" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 60" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 mb-1">Linked Bank Account</label>
-          <select id="loanLinkedAccount" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500"></select>
-        </div>
-
-        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
-          Save Loan Profile
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 6. Vehicle Modal -->
+  <!-- 5. Vehicle Modal -->
   <div id="vehicleModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -906,7 +698,7 @@
     </div>
   </div>
 
-  <!-- 7. Fuel & Service Modal -->
+  <!-- 6. Fuel & Service Modal -->
   <div id="serviceLogModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -969,7 +761,7 @@
     </div>
   </div>
 
-  <!-- 8. Health Dose Modal -->
+  <!-- 7. Health Dose Modal -->
   <div id="healthModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -1006,7 +798,7 @@
     </div>
   </div>
 
-  <!-- 9. Document & Task Modal -->
+  <!-- 8. Document & Task Modal -->
   <div id="docModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -1055,7 +847,7 @@
     </div>
   </div>
 
-  <!-- 10. Entity / Person Modal -->
+  <!-- 9. Entity / Person Modal -->
   <div id="entityModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -1095,7 +887,7 @@
     </div>
   </div>
 
-  <!-- 11. Settings Modal -->
+  <!-- 10. Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -1112,7 +904,7 @@
             <span class="font-bold text-white block">Application Version</span>
             <span class="text-[11px] text-slate-400">Chuvadi Build</span>
           </div>
-          <span class="text-xs font-mono font-bold text-brand-300 bg-brand-500/20 border border-brand-500/30 px-2 py-0.5 rounded" id="appSettingsVersion">v1.3.0</span>
+          <span class="text-xs font-mono font-bold text-brand-300 bg-brand-500/20 border border-brand-500/30 px-2 py-0.5 rounded" id="appSettingsVersion">v1.4.0</span>
         </div>
 
         <div>
@@ -1151,7 +943,7 @@
     } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
     // Application Version
-    const APP_VERSION = "v1.3.0";
+    const APP_VERSION = "v1.4.0";
     document.getElementById('appHeaderVersion').innerText = APP_VERSION;
     document.getElementById('appSettingsVersion').innerText = APP_VERSION;
 
@@ -1173,7 +965,6 @@
     // Global Reactive App State
     window.AppState = {
       accounts: [],
-      loans: [],
       transactions: [],
       entities: [],
       vehicles: [],
@@ -1182,18 +973,9 @@
       documents: [],
       geminiKey: localStorage.getItem('chuvadi_gemini_key') || '',
       activePassbookAccountId: null,
-      selectedActionTxnId: null
+      selectedActionTxnId: null,
+      expenseChartInstance: null
     };
-
-    // Standard Chartered MOA Homesaver Reconciled Dataset (as of Aug 29, 2026)
-    const stancartPastTransactions = [
-      { date: '2026-06-01', desc: 'INT DEBIT TXN REF RAJAPRIYAN R', debit: 23235.00, credit: 0, balance: -3737260.99 },
-      { date: '2026-06-29', desc: 'ONLINE FUND TRANSFER FROM A/C NO 42117157747', debit: 0, credit: 32480.00, balance: -3704780.99 },
-      { date: '2026-07-01', desc: 'INT DEBIT TXN REF RAJAPRIYAN R', debit: 22558.00, credit: 0, balance: -3727338.99 },
-      { date: '2026-07-28', desc: 'ONLINE FUND TRANSFER FROM A/C NO 42117157747', debit: 0, credit: 32480.00, balance: -3694858.99 },
-      { date: '2026-08-01', desc: 'INT DEBIT TXN REF RAJAPRIYAN R', debit: 23242.00, credit: 0, balance: -3718100.99 },
-      { date: '2026-08-28', desc: 'ONLINE FUND TRANSFER FROM A/C NO 42117157747', debit: 0, credit: 32480.00, balance: -3685620.99 }
-    ];
 
     function formatDate(d) {
       if (!d) return '';
@@ -1226,34 +1008,27 @@
         }
       });
 
-      // 2. Loans
-      onSnapshot(collection(db, "loans"), (snap) => {
-        window.AppState.loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderLoans();
-        updateDashboardMetrics();
-        populateLoanSelects();
-        runPrepaymentSim();
-      });
-
-      // 3. Transactions
+      // 2. Transactions
       onSnapshot(query(collection(db, "transactions"), orderBy("date", "desc")), (snap) => {
         window.AppState.transactions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderTransactionHistory();
         renderRecentTransactions();
         updateDashboardMetrics();
+        renderExpenseReports();
         if (window.AppState.activePassbookAccountId) {
           renderPassbook(window.AppState.activePassbookAccountId);
         }
       });
 
-      // 4. Receivables & Payables
+      // 3. Receivables & Payables
       onSnapshot(collection(db, "receivables_payables"), (snap) => {
         window.AppState.entities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderEntities();
         updateDashboardMetrics();
+        populateAccountSelects(); // Updates transfer dropdowns with person receivables
       });
 
-      // 5. Vehicles
+      // 4. Vehicles
       onSnapshot(collection(db, "vehicles"), (snap) => {
         window.AppState.vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderVehicles();
@@ -1261,20 +1036,20 @@
         checkUrgentAlerts();
       });
 
-      // 6. Vehicle Logs
+      // 5. Vehicle Logs
       onSnapshot(query(collection(db, "vehicle_logs"), orderBy("date", "desc")), (snap) => {
         window.AppState.vehicleLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderVehicleLogs();
       });
 
-      // 7. Health Cycles
+      // 6. Health Cycles
       onSnapshot(collection(db, "health_logs"), (snap) => {
         window.AppState.healthCycles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderHealthCycles();
         checkUrgentAlerts();
       });
 
-      // 8. Documents & Tasks
+      // 7. Documents & Tasks
       onSnapshot(collection(db, "documents"), (snap) => {
         window.AppState.documents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderDocuments();
@@ -1286,16 +1061,14 @@
     // METRICS & URGENT ALERTS
     // ----------------------------------------------------
     function updateDashboardMetrics() {
-      let liquid = 0, assets = 0, debt = 3527960.77, receivables = 0;
+      let liquid = 0, assets = 0, receivables = 0, monthSpend = 0;
+      const currentMonthKey = new Date().toISOString().slice(0, 7); // YYYY-MM
 
       window.AppState.accounts.forEach(acc => {
         const bal = Number(acc.balance) || 0;
-        if (acc.type === 'LIQUID_BANK') liquid += bal;
+        if (acc.type === 'BANK_ACCOUNT' || !acc.type) liquid += bal;
+        else if (acc.type === 'RECEIVABLE_ACCOUNT') receivables += bal;
         else if (acc.type === 'INVESTMENT_PF' || acc.type === 'FIXED_ASSET') assets += bal;
-      });
-
-      window.AppState.loans.forEach(loan => {
-        debt += Number(loan.outstandingPrincipal) || 0;
       });
 
       window.AppState.entities.forEach(ent => {
@@ -1303,10 +1076,16 @@
         if (ent.type === 'RECEIVABLE') receivables += amt;
       });
 
+      window.AppState.transactions.forEach(t => {
+        if (t.type === 'EXPENSE' && t.date && t.date.startsWith(currentMonthKey)) {
+          monthSpend += Number(t.amount) || 0;
+        }
+      });
+
       document.getElementById('dashTotalLiquid').innerText = formatCurrency(liquid);
-      document.getElementById('dashTotalAssets').innerText = formatCurrency(assets + liquid);
-      document.getElementById('dashTotalDebt').innerText = formatCurrency(debt);
+      document.getElementById('dashTotalAssets').innerText = formatCurrency(assets);
       document.getElementById('dashTotalReceivables').innerText = formatCurrency(receivables);
+      document.getElementById('dashMonthSpend').innerText = formatCurrency(monthSpend);
     }
 
     function checkUrgentAlerts() {
@@ -1380,33 +1159,25 @@
     }
 
     // ----------------------------------------------------
-    // ACCOUNTS & PASSBOOK MODULE
+    // COMPACT BANK ACCOUNTS & PASSBOOK MODULE
     // ----------------------------------------------------
     function renderAccounts() {
       const container = document.getElementById('accountsList');
       if (window.AppState.accounts.length === 0) {
-        container.innerHTML = `<div class="col-span-2 text-center py-6 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No bank accounts added yet. Tap "+ Add Account".</div>`;
+        container.innerHTML = `<div class="col-span-2 text-center py-5 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No accounts configured yet. Tap "+ Add Account".</div>`;
         return;
       }
+      
+      // Compact accounts display: No liquid badge, no outer buttons
       container.innerHTML = window.AppState.accounts.map(acc => `
-        <div onclick="openPassbookModal('${acc.id}')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-4 rounded-2xl flex justify-between items-start cursor-pointer transition shadow-md group">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-white group-hover:text-brand-300 transition">${acc.name}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${acc.type === 'LIQUID_BANK' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : acc.type === 'INVESTMENT_PF' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
-                ${acc.type === 'LIQUID_BANK' ? 'Liquid' : acc.type === 'INVESTMENT_PF' ? 'Investment' : 'Fixed Asset'}
-              </span>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
-              <i data-lucide="book-open" class="w-3 h-3 text-brand-400"></i> ${acc.purpose || 'General Passbook'}
-            </p>
+        <div onclick="openPassbookModal('${acc.id}')" class="bg-dark-card hover:bg-dark-hover border border-dark-border px-3.5 py-2.5 rounded-xl flex justify-between items-center cursor-pointer transition shadow-sm group">
+          <div class="min-w-0 flex-1 pr-2">
+            <h4 class="text-xs font-bold text-white group-hover:text-brand-300 truncate transition">${acc.name}</h4>
+            <p class="text-[10px] text-slate-400 truncate mt-0.5">${acc.purpose || 'Passbook Statement'}</p>
           </div>
-          <div class="text-right">
-            <span class="text-sm font-extrabold text-white block">${formatCurrency(acc.balance)}</span>
-            <div class="flex gap-2 justify-end mt-1" onclick="event.stopPropagation()">
-              <button onclick="openEditAccountModal('${acc.id}')" class="text-[10px] text-brand-400 hover:underline">Edit</button>
-              <button onclick="deleteDocItem('accounts', '${acc.id}')" class="text-[10px] text-slate-500 hover:text-rose-400">Delete</button>
-            </div>
+          <div class="text-right shrink-0">
+            <span class="text-xs font-extrabold text-white block">${formatCurrency(acc.balance)}</span>
+            <span class="text-[9px] text-brand-400 font-medium opacity-80">View Statement →</span>
           </div>
         </div>
       `).join('');
@@ -1424,9 +1195,18 @@
       if (!acc) return;
 
       document.getElementById('pbAccountName').innerText = acc.name;
-      document.getElementById('pbAccountPurpose').innerText = `${acc.purpose || 'General'} • Statement`;
+      document.getElementById('pbAccountPurpose').innerText = `${acc.purpose || 'Statement'} • Passbook`;
       document.getElementById('pbAccountBalance').innerText = formatCurrency(acc.balance);
-      document.getElementById('pbEditAccountBtn').onclick = () => openEditAccountModal(acc.id);
+      
+      // Inside Edit & Delete buttons
+      document.getElementById('pbEditAccountBtn').onclick = () => {
+        closeModal('passbookModal');
+        openEditAccountModal(acc.id);
+      };
+      document.getElementById('pbDeleteAccountBtn').onclick = () => {
+        closeModal('passbookModal');
+        deleteDocItem('accounts', acc.id);
+      };
 
       const pbList = document.getElementById('pbTxnList');
       const accountTxns = window.AppState.transactions.filter(t => {
@@ -1447,28 +1227,28 @@
 
           if (t.type === 'INCOME') {
             isCredit = true;
-          } else if (t.type === 'EXPENSE' || t.type === 'LOAN_EMI') {
+          } else if (t.type === 'EXPENSE') {
             isCredit = false;
           } else if (t.type === 'TRANSFER') {
-            const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
-            const toAcc = window.AppState.accounts.find(a => a.id === t.toAccountId);
+            const fromAcc = getAccountOrEntityName(t.fromAccountId);
+            const toAcc = getAccountOrEntityName(t.toAccountId);
             if (t.toAccountId === accId) {
               isCredit = true;
-              transferText = `Transfer In from ${fromAcc ? fromAcc.name : 'Account'}`;
+              transferText = `Transfer In from ${fromAcc}`;
             } else {
               isCredit = false;
-              transferText = `Transfer Out to ${toAcc ? toAcc.name : 'Account'}`;
+              transferText = `Transfer Out to ${toAcc}`;
             }
           } else if (t.type === 'MULTI_TRANSFER') {
             if (t.fromAccountId === accId) {
               isCredit = false;
-              transferText = `Salary Split Out (${t.splits?.length || 0} Accounts)`;
+              transferText = `Salary Split Out (${t.splits?.length || 0} Targets)`;
             } else {
               const splitMatch = t.splits?.find(s => s.toAccountId === accId);
               isCredit = true;
               displayAmount = splitMatch ? splitMatch.amount : t.amount;
-              const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
-              transferText = `Salary Split In from ${fromAcc ? fromAcc.name : 'Source'}`;
+              const fromAcc = getAccountOrEntityName(t.fromAccountId);
+              transferText = `Salary Split In from ${fromAcc}`;
             }
           }
 
@@ -1494,7 +1274,7 @@
         }).join('');
       }
 
-      // Feature 4: Opening balance at the end of the statement if not 0
+      // Opening balance at the end of the statement if not 0
       const openingBal = Number(acc.openingBalance !== undefined ? acc.openingBalance : (acc.balance || 0));
       if (openingBal !== 0) {
         itemsHtml += `
@@ -1519,12 +1299,11 @@
       lucide.createIcons();
     }
 
-    // Feature 5: Add / Edit Account Logic
     window.openAddAccountModal = function() {
       document.getElementById('accEditId').value = '';
       document.getElementById('accountForm').reset();
       document.getElementById('accountModalTitle').innerText = "Add Financial Account";
-      document.getElementById('accountModalSubtitle').innerText = "Configure bank account, investment or asset";
+      document.getElementById('accountModalSubtitle').innerText = "Configure bank account, investment, asset or receivable";
       document.getElementById('accSubmitBtn').innerText = "Save Account";
       openModal('accountModal');
     };
@@ -1535,7 +1314,7 @@
 
       document.getElementById('accEditId').value = acc.id;
       document.getElementById('accName').value = acc.name || '';
-      document.getElementById('accType').value = acc.type || 'LIQUID_BANK';
+      document.getElementById('accType').value = acc.type || 'BANK_ACCOUNT';
       document.getElementById('accPurpose').value = acc.purpose || '';
       document.getElementById('accOpeningBalance').value = acc.openingBalance !== undefined ? acc.openingBalance : (acc.balance || 0);
 
@@ -1583,8 +1362,148 @@
       document.getElementById('accEditId').value = '';
     };
 
+    // Helper: Resolves names across both accounts and receivable entities
+    function getAccountOrEntityName(id) {
+      if (!id) return 'Account';
+      const acc = window.AppState.accounts.find(a => a.id === id);
+      if (acc) return acc.name;
+      const ent = window.AppState.entities.find(e => e.id === id);
+      if (ent) return `${ent.name} (Person)`;
+      return 'Account';
+    }
+
+    // Populate From & To selects including all accounts & receivable entities
+    function populateAccountSelects() {
+      const fromSel = document.getElementById('txnFromAccount');
+      const toSel = document.getElementById('txnToAccount');
+
+      let options = '<optgroup label="Bank & Asset Accounts">';
+      options += window.AppState.accounts.map(a => `<option value="${a.id}">${a.name} (${formatCurrency(a.balance)})</option>`).join('');
+      options += '</optgroup>';
+
+      if (window.AppState.entities.length > 0) {
+        options += '<optgroup label="Receivables / People">';
+        options += window.AppState.entities.map(e => `<option value="${e.id}">${e.name} (${e.type === 'RECEIVABLE' ? 'Receivable' : 'Payable'}: ${formatCurrency(e.amount)})</option>`).join('');
+        options += '</optgroup>';
+      }
+
+      if (fromSel) fromSel.innerHTML = options;
+      if (toSel) toSel.innerHTML = options;
+    }
+
     // ----------------------------------------------------
-    // TRANSACTION ACTION POPUP MODAL (Feature 3)
+    // EXPENSE REPORTS ENGINE (NEW MODULE)
+    // ----------------------------------------------------
+    window.renderExpenseReports = function() {
+      const period = document.getElementById('reportPeriodSelect')?.value || 'THIS_MONTH';
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth(); // 0-indexed
+
+      let filteredTxns = window.AppState.transactions.filter(t => t.type === 'EXPENSE');
+
+      if (period === 'THIS_MONTH') {
+        const key = today.toISOString().slice(0, 7);
+        filteredTxns = filteredTxns.filter(t => t.date && t.date.startsWith(key));
+      } else if (period === 'LAST_MONTH') {
+        const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
+        const key = lastMonthDate.toISOString().slice(0, 7);
+        filteredTxns = filteredTxns.filter(t => t.date && t.date.startsWith(key));
+      } else if (period === 'THIS_YEAR') {
+        const key = `${currentYear}-`;
+        filteredTxns = filteredTxns.filter(t => t.date && t.date.startsWith(key));
+      }
+
+      // Compute category sums
+      const catMap = {};
+      let totalSpent = 0;
+      filteredTxns.forEach(t => {
+        const cat = t.category || 'Uncategorized';
+        const amt = Number(t.amount) || 0;
+        catMap[cat] = (catMap[cat] || 0) + amt;
+        totalSpent += amt;
+      });
+
+      // KPI cards update
+      const totalEl = document.getElementById('repTotalSpent');
+      const dailyEl = document.getElementById('repDailyAverage');
+      const topCatEl = document.getElementById('repTopCategory');
+
+      if (totalEl) totalEl.innerText = formatCurrency(totalSpent);
+
+      // Days elapsed calculation for daily average
+      let daysCount = 30;
+      if (period === 'THIS_MONTH') daysCount = Math.max(1, today.getDate());
+      else if (period === 'THIS_YEAR') daysCount = Math.max(1, Math.ceil((today - new Date(currentYear, 0, 1)) / (1000 * 60 * 60 * 24)));
+      if (dailyEl) dailyEl.innerText = formatCurrency(totalSpent / daysCount);
+
+      // Identify top category
+      const sortedCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+      if (topCatEl) {
+        topCatEl.innerText = sortedCats.length > 0 ? `${sortedCats[0][0]} (${formatCurrency(sortedCats[0][1])})` : 'No expenses';
+      }
+
+      // Render category progress list
+      const catListContainer = document.getElementById('repCategoryList');
+      if (catListContainer) {
+        if (sortedCats.length === 0) {
+          catListContainer.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">No expenses recorded for this period.</div>`;
+        } else {
+          catListContainer.innerHTML = sortedCats.map(([cat, amt]) => {
+            const pct = totalSpent > 0 ? ((amt / totalSpent) * 100).toFixed(1) : 0;
+            return `
+              <div class="space-y-1 text-xs">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-white">${cat}</span>
+                  <div class="text-right">
+                    <span class="font-bold text-rose-400">${formatCurrency(amt)}</span>
+                    <span class="text-[10px] text-slate-400 ml-1">(${pct}%)</span>
+                  </div>
+                </div>
+                <div class="w-full bg-dark-bg h-2 rounded-full overflow-hidden border border-dark-border/60">
+                  <div class="bg-gradient-to-r from-rose-500 to-brand-500 h-full rounded-full" style="width: ${pct}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Render Chart.js Doughnut Chart
+      const ctx = document.getElementById('expenseChart')?.getContext('2d');
+      if (ctx) {
+        if (window.AppState.expenseChartInstance) {
+          window.AppState.expenseChartInstance.destroy();
+        }
+
+        const labels = sortedCats.map(c => c[0]);
+        const dataVals = sortedCats.map(c => c[1]);
+        const palette = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#14b8a6', '#f43f5e'];
+
+        window.AppState.expenseChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels.length > 0 ? labels : ['No Data'],
+            datasets: [{
+              data: dataVals.length > 0 ? dataVals : [1],
+              backgroundColor: dataVals.length > 0 ? palette.slice(0, labels.length) : ['#334155'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+    };
+
+    // ----------------------------------------------------
+    // TRANSACTION ACTION POPUP (Feature 3)
     // ----------------------------------------------------
     window.openTxnActionModal = function(txnId) {
       const t = window.AppState.transactions.find(item => item.id === txnId);
@@ -1592,7 +1511,7 @@
 
       window.AppState.selectedActionTxnId = txnId;
 
-      const isExpense = t.type === 'EXPENSE' || t.type === 'LOAN_EMI';
+      const isExpense = t.type === 'EXPENSE';
       const isIncome = t.type === 'INCOME';
       const colorClass = isIncome ? 'bg-emerald-500/20 text-emerald-300' : isExpense ? 'bg-rose-500/20 text-rose-300' : 'bg-blue-500/20 text-blue-300';
 
@@ -1606,15 +1525,14 @@
 
       let routingText = '';
       if (t.type === 'TRANSFER') {
-        const from = window.AppState.accounts.find(a => a.id === t.fromAccountId);
-        const to = window.AppState.accounts.find(a => a.id === t.toAccountId);
-        routingText = `${from ? from.name : 'Source'} → ${to ? to.name : 'Target'}`;
+        const from = getAccountOrEntityName(t.fromAccountId);
+        const to = getAccountOrEntityName(t.toAccountId);
+        routingText = `${from} → ${to}`;
       } else if (t.type === 'MULTI_TRANSFER') {
-        const from = window.AppState.accounts.find(a => a.id === t.fromAccountId);
-        routingText = `${from ? from.name : 'Source'} → ${t.splits?.length || 0} Accounts`;
+        const from = getAccountOrEntityName(t.fromAccountId);
+        routingText = `${from} → ${t.splits?.length || 0} Targets`;
       } else {
-        const acc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
-        routingText = acc ? acc.name : 'General Account';
+        routingText = getAccountOrEntityName(t.fromAccountId);
       }
       document.getElementById('actTxnAccount').innerText = routingText;
 
@@ -1673,22 +1591,22 @@
     }
 
     function renderTxnItem(t) {
-      const isExpense = t.type === 'EXPENSE' || t.type === 'LOAN_EMI';
+      const isExpense = t.type === 'EXPENSE';
       const isIncome = t.type === 'INCOME';
       const color = isIncome ? 'text-emerald-400' : isExpense ? 'text-rose-400' : 'text-blue-400';
       const prefix = isIncome ? '+' : isExpense ? '-' : '⇄';
 
       let subtitleDetail = '';
       if (t.type === 'TRANSFER') {
-        const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
-        const toAcc = window.AppState.accounts.find(a => a.id === t.toAccountId);
-        subtitleDetail = `<span class="text-brand-300 font-semibold">${fromAcc ? fromAcc.name : 'Account'}</span> <span class="text-slate-500">→</span> <span class="text-indigo-300 font-semibold">${toAcc ? toAcc.name : 'Account'}</span>`;
+        const fromAcc = getAccountOrEntityName(t.fromAccountId);
+        const toAcc = getAccountOrEntityName(t.toAccountId);
+        subtitleDetail = `<span class="text-brand-300 font-semibold">${fromAcc}</span> <span class="text-slate-500">→</span> <span class="text-indigo-300 font-semibold">${toAcc}</span>`;
       } else if (t.type === 'MULTI_TRANSFER') {
-        const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
-        subtitleDetail = `<span class="text-purple-300 font-semibold">${fromAcc ? fromAcc.name : 'Source'}</span> <span class="text-slate-500">→</span> <span class="text-brand-300 font-semibold">${t.splits?.length || 0} Accounts Split</span>`;
+        const fromAcc = getAccountOrEntityName(t.fromAccountId);
+        subtitleDetail = `<span class="text-purple-300 font-semibold">${fromAcc}</span> <span class="text-slate-500">→</span> <span class="text-brand-300 font-semibold">${t.splits?.length || 0} Targets</span>`;
       } else {
-        const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
-        subtitleDetail = `${fromAcc ? fromAcc.name + ' • ' : ''}${t.notes ? t.notes : ''}`;
+        const fromAcc = getAccountOrEntityName(t.fromAccountId);
+        subtitleDetail = `${fromAcc} ${t.notes ? '• ' + t.notes : ''}`;
       }
 
       return `
@@ -1715,130 +1633,8 @@
     }
 
     // ----------------------------------------------------
-    // STANDARD CHARTERED HOMESAVER & PROJECTIONS
+    // VEHICLES, HEALTH, VAULT RENDERING
     // ----------------------------------------------------
-    window.syncStandCharteredLoanToFirebase = async function() {
-      await setDoc(doc(db, "loans", "loan_stancard_homesaver"), {
-        name: "Standard Chartered MOA Homesaver",
-        lender: "Standard Chartered Bank",
-        loanType: "HOME",
-        accountNumber: "42705645432",
-        linkedCasa: "42117157747",
-        originalAmount: 4000000.00,
-        outstandingPrincipal: 3527960.77,
-        interestRate: 7.35,
-        emiAmount: 32480.00,
-        remainingTenureMonths: 204,
-        tenureSavedMonths: 5,
-        scheduledLoanLimit: 3769232.01,
-        netInterestSaved: 51131.02,
-        netOutstandingLiability: 3718100.99,
-        runningLedgerBalance: -3685620.99,
-        availableWithdrawable: 83611.00,
-        totalCumulativeInterest: 828094.99,
-        updatedAt: serverTimestamp()
-      });
-      alert("Standard Chartered Home Loan details synced successfully to Firebase!");
-    };
-
-    function renderHomesaverStatement() {
-      const tbody = document.getElementById('hlPastStatementBody');
-      tbody.innerHTML = stancartPastTransactions.map(t => `
-        <tr class="border-b border-dark-border/30">
-          <td class="p-2">${t.date}</td>
-          <td class="p-2">${t.desc}</td>
-          <td class="p-2 text-right text-rose-400">${t.debit > 0 ? '₹' + t.debit.toFixed(2) : '—'}</td>
-          <td class="p-2 text-right text-emerald-400">${t.credit > 0 ? '₹' + t.credit.toFixed(2) : '—'}</td>
-          <td class="p-2 text-right font-bold text-white">₹${t.balance.toFixed(2)}</td>
-        </tr>
-      `).join('');
-
-      // Render 204-month Future Projection Amortization Table
-      let currP = 3527960.77;
-      const r = 7.35 / (12 * 100);
-      let projHtml = '';
-      for (let m = 1; m <= 204; m++) {
-        const intAmt = currP * r;
-        const prinAmt = Math.min(currP, 32480 - intAmt);
-        currP = Math.max(0, currP - prinAmt);
-        projHtml += `
-          <tr class="border-b border-dark-border/30">
-            <td class="p-2">Month ${m}</td>
-            <td class="p-2 text-right">₹32,480</td>
-            <td class="p-2 text-right text-rose-400">₹${intAmt.toFixed(0)}</td>
-            <td class="p-2 text-right text-emerald-400">₹${prinAmt.toFixed(0)}</td>
-            <td class="p-2 text-right font-bold text-white">₹${currP.toFixed(0)}</td>
-          </tr>
-        `;
-        if (currP <= 0) break;
-      }
-      document.getElementById('hlProjectionBody').innerHTML = projHtml;
-    }
-
-    window.showHomeLoanTab = function(type) {
-      document.getElementById('hlPastStatementView').classList.toggle('hidden', type !== 'statement');
-      document.getElementById('hlProjectionView').classList.toggle('hidden', type !== 'projection');
-      document.getElementById('hlStatementTabBtn').className = type === 'statement' ? "py-2 rounded-xl text-xs font-bold bg-brand-600/20 text-brand-300 border border-brand-500/30" : "py-2 rounded-xl text-xs font-semibold text-slate-400 bg-dark-bg border border-dark-border";
-      document.getElementById('hlProjectionTabBtn').className = type === 'projection' ? "py-2 rounded-xl text-xs font-bold bg-brand-600/20 text-brand-300 border border-brand-500/30" : "py-2 rounded-xl text-xs font-semibold text-slate-400 bg-dark-bg border border-dark-border";
-    };
-
-    // ----------------------------------------------------
-    // OTHER LOANS, VEHICLES, HEALTH, VAULT RENDERING
-    // ----------------------------------------------------
-    function renderLoans() {
-      const container = document.getElementById('loansList');
-      const otherLoans = window.AppState.loans.filter(l => l.id !== 'loan_stancard_homesaver');
-      if (otherLoans.length === 0) {
-        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">No additional loans added.</div>`;
-        return;
-      }
-
-      container.innerHTML = otherLoans.map(l => {
-        const sanctioned = Number(l.originalAmount) || 1;
-        const outstanding = Number(l.outstandingPrincipal) || 0;
-        const repaid = Math.max(0, sanctioned - outstanding);
-        const percent = Math.min(100, Math.round((repaid / sanctioned) * 100));
-
-        return `
-          <div class="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <i data-lucide="${l.loanType === 'HOME' ? 'home' : 'car'}" class="w-4 h-4 text-brand-400"></i>
-                  ${l.name}
-                </span>
-                <p class="text-[11px] text-slate-400">${l.lender} • ${l.interestRate}% p.a. • EMI: ${formatCurrency(l.emiAmount)}/mo</p>
-              </div>
-              <div class="text-right">
-                <span class="text-xs text-slate-400 block">Remaining Principal</span>
-                <span class="text-base font-extrabold text-rose-400">${formatCurrency(outstanding)}</span>
-              </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <div class="flex justify-between text-[11px] text-slate-400">
-                <span>Repaid: ${formatCurrency(repaid)} (${percent}%)</span>
-                <span>Sanctioned: ${formatCurrency(sanctioned)}</span>
-              </div>
-              <div class="w-full bg-dark-bg h-2 rounded-full overflow-hidden border border-dark-border">
-                <div class="bg-gradient-to-r from-brand-600 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
-              </div>
-            </div>
-
-            <div class="flex gap-2 pt-1 border-t border-dark-border/50">
-              <button onclick="openEmiPaymentModal('${l.id}')" class="flex-1 py-1.5 bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1">
-                <i data-lucide="check" class="w-3.5 h-3.5"></i> Log EMI
-              </button>
-              <button onclick="openPartPaymentModal('${l.id}')" class="flex-1 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1">
-                <i data-lucide="zap" class="w-3.5 h-3.5"></i> Part-Payment
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-      lucide.createIcons();
-    }
-
     function renderEntities() {
       const container = document.getElementById('entitiesList');
       if (window.AppState.entities.length === 0) {
@@ -1982,28 +1778,6 @@
       lucide.createIcons();
     }
 
-    function populateAccountSelects() {
-      const fromSel = document.getElementById('txnFromAccount');
-      const toSel = document.getElementById('txnToAccount');
-      const loanAccSel = document.getElementById('loanLinkedAccount');
-
-      const options = window.AppState.accounts.map(a => `<option value="${a.id}">${a.name} (${formatCurrency(a.balance)})</option>`).join('');
-      if (fromSel) fromSel.innerHTML = options;
-      if (toSel) toSel.innerHTML = options;
-      if (loanAccSel) loanAccSel.innerHTML = options;
-    }
-
-    function populateLoanSelects() {
-      const loanSel = document.getElementById('txnLoanId');
-      const simSel = document.getElementById('simLoanSelect');
-
-      let options = `<option value="loan_stancard_homesaver">Standard Chartered MOA Homesaver (₹35,27,961)</option>`;
-      options += window.AppState.loans.filter(l => l.id !== 'loan_stancard_homesaver').map(l => `<option value="${l.id}">${l.name} (${formatCurrency(l.outstandingPrincipal)})</option>`).join('');
-      
-      if (loanSel) loanSel.innerHTML = options;
-      if (simSel) simSel.innerHTML = options;
-    }
-
     function populateVehicleSelects() {
       const sel = document.getElementById('logVehId');
       if (sel) {
@@ -2017,7 +1791,16 @@
     window.addMultiTransferRow = function(targetAccId = '', amount = '', note = '') {
       const container = document.getElementById('multiTransferRows');
       const rowId = 'split_row_' + Math.random().toString(36).substr(2, 9);
-      const accOptions = window.AppState.accounts.map(a => `<option value="${a.id}" ${a.id === targetAccId ? 'selected' : ''}>${a.name}</option>`).join('');
+      
+      let accOptions = '<optgroup label="Accounts">';
+      accOptions += window.AppState.accounts.map(a => `<option value="${a.id}" ${a.id === targetAccId ? 'selected' : ''}>${a.name}</option>`).join('');
+      accOptions += '</optgroup>';
+
+      if (window.AppState.entities.length > 0) {
+        accOptions += '<optgroup label="Receivables / People">';
+        accOptions += window.AppState.entities.map(e => `<option value="${e.id}" ${e.id === targetAccId ? 'selected' : ''}>${e.name}</option>`).join('');
+        accOptions += '</optgroup>';
+      }
 
       const rowHtml = document.createElement('div');
       rowHtml.id = rowId;
@@ -2055,89 +1838,6 @@
     };
 
     // ----------------------------------------------------
-    // PREPAYMENT SIMULATOR & EMI SPLIT
-    // ----------------------------------------------------
-    window.runPrepaymentSim = function() {
-      const loanId = document.getElementById('simLoanSelect').value;
-      const lumpSum = parseFloat(document.getElementById('simLumpSum').value) || 0;
-      const stepUp = parseFloat(document.getElementById('simMonthlyStepUp').value) || 0;
-
-      let principal = 3527960.77;
-      let rate = 7.35;
-      let emi = 32480;
-
-      if (loanId !== 'loan_stancard_homesaver') {
-        const loan = window.AppState.loans.find(l => l.id === loanId);
-        if (loan) {
-          principal = Number(loan.outstandingPrincipal) || 0;
-          rate = Number(loan.interestRate) || 8.5;
-          emi = Number(loan.emiAmount) || 0;
-        }
-      }
-
-      const P = Math.max(0, principal - lumpSum);
-      const r = rate / (12 * 100);
-      const E = emi + stepUp;
-
-      if (P <= 0 || E <= P * r) {
-        document.getElementById('simMonthsSaved').innerText = "Instant Payoff!";
-        document.getElementById('simInterestSaved').innerText = formatCurrency(principal * 0.4);
-        return;
-      }
-
-      const nNew = Math.ceil(-Math.log(1 - (P * r) / E) / Math.log(1 + r));
-      const nOld = Math.ceil(-Math.log(1 - (principal * r) / emi) / Math.log(1 + r)) || 204;
-
-      const monthsSaved = Math.max(0, nOld - nNew);
-      const totalOldPayment = nOld * emi;
-      const totalNewPayment = (nNew * E) + lumpSum;
-      const interestSaved = Math.max(0, totalOldPayment - totalNewPayment);
-
-      const targetDate = new Date();
-      targetDate.setMonth(targetDate.getMonth() + nNew);
-
-      document.getElementById('simMonthsSaved').innerText = `${monthsSaved} Months (${(monthsSaved / 12).toFixed(1)} Yrs)`;
-      document.getElementById('simInterestSaved').innerText = formatCurrency(interestSaved);
-      document.getElementById('simNewPayoffDate').innerText = targetDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
-    };
-
-    window.handleEmiSplitCalculation = function() {
-      const type = document.getElementById('txnTypeInput').value;
-      if (type !== 'LOAN_EMI') return;
-
-      const override = document.getElementById('emiOverrideToggle').checked;
-      if (override) return;
-
-      const loanId = document.getElementById('txnLoanId').value;
-      const totalPaid = parseFloat(document.getElementById('txnAmount').value) || 0;
-
-      let principal = 3527960.77;
-      let rate = 7.35;
-
-      if (loanId !== 'loan_stancard_homesaver') {
-        const loan = window.AppState.loans.find(l => l.id === loanId);
-        if (loan) {
-          principal = Number(loan.outstandingPrincipal) || 0;
-          rate = Number(loan.interestRate) || 8.5;
-        }
-      }
-
-      if (totalPaid <= 0) return;
-
-      const monthlyInterest = (principal * rate) / (12 * 100);
-      const principalPaid = Math.max(0, totalPaid - monthlyInterest);
-
-      document.getElementById('emiPrincipalAmount').value = principalPaid.toFixed(2);
-      document.getElementById('emiInterestAmount').value = monthlyInterest.toFixed(2);
-    };
-
-    window.toggleEmiOverride = function() {
-      const override = document.getElementById('emiOverrideToggle').checked;
-      document.getElementById('emiPrincipalAmount').readOnly = !override;
-      document.getElementById('emiInterestAmount').readOnly = !override;
-    };
-
-    // ----------------------------------------------------
     // EDIT & DUPLICATE TRANSACTIONS
     // ----------------------------------------------------
     window.editTransaction = function(txnId) {
@@ -2161,16 +1861,6 @@
       if (t.type === 'MULTI_TRANSFER' && t.splits) {
         document.getElementById('multiTransferRows').innerHTML = '';
         t.splits.forEach(s => addMultiTransferRow(s.toAccountId, s.amount, s.note));
-      }
-
-      if (t.type === 'LOAN_EMI' && t.loanId) {
-        document.getElementById('txnLoanId').value = t.loanId;
-        if (t.split) {
-          document.getElementById('emiPrincipalAmount').value = t.split.principal || 0;
-          document.getElementById('emiInterestAmount').value = t.split.interest || 0;
-          document.getElementById('emiOverrideToggle').checked = !!t.split.overridden;
-          toggleEmiOverride();
-        }
       }
 
       openModal('txnModal');
@@ -2224,38 +1914,12 @@
             if (toAcc) await updateDoc(doc(db, "accounts", s.toAccountId), { balance: toAcc.balance - (Number(s.amount) || 0) });
           }
         }
-      } else if (oldTxn.type === 'LOAN_EMI') {
-        const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
-        if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + amt });
-        if (oldTxn.loanId && oldTxn.split?.principal) {
-          const loan = window.AppState.loans.find(l => l.id === oldTxn.loanId);
-          if (loan) await updateDoc(doc(db, "loans", oldTxn.loanId), { outstandingPrincipal: loan.outstandingPrincipal + oldTxn.split.principal });
-        }
       }
     }
 
     // ----------------------------------------------------
     // FIRESTORE MUTATIONS
     // ----------------------------------------------------
-    window.saveLoan = async function(e) {
-      e.preventDefault();
-      await addDoc(collection(db, "loans"), {
-        name: document.getElementById('loanName').value,
-        lender: document.getElementById('loanLender').value,
-        loanType: document.getElementById('loanType').value,
-        originalAmount: parseFloat(document.getElementById('loanSanctioned').value) || 0,
-        outstandingPrincipal: parseFloat(document.getElementById('loanOutstanding').value) || 0,
-        interestRate: parseFloat(document.getElementById('loanInterestRate').value) || 0,
-        emiAmount: parseFloat(document.getElementById('loanEmi').value) || 0,
-        startDate: document.getElementById('loanStartDate').value,
-        tenureMonths: parseInt(document.getElementById('loanTenureMonths').value) || 60,
-        linkedBankAccountId: document.getElementById('loanLinkedAccount').value,
-        createdAt: serverTimestamp()
-      });
-      closeModal('loanModal');
-      document.getElementById('loanForm').reset();
-    };
-
     window.saveTransaction = async function(e) {
       e.preventDefault();
       const editId = document.getElementById('txnEditId').value;
@@ -2304,23 +1968,7 @@
           }
         }
       } else {
-        if (type === 'LOAN_EMI') {
-          const loanId = document.getElementById('txnLoanId').value;
-          const principal = parseFloat(document.getElementById('emiPrincipalAmount').value) || 0;
-          const interest = parseFloat(document.getElementById('emiInterestAmount').value) || 0;
-          txnData.loanId = loanId;
-          txnData.split = { principal, interest, overridden: document.getElementById('emiOverrideToggle').checked };
-
-          if (loanId !== 'loan_stancard_homesaver') {
-            const loan = window.AppState.loans.find(l => l.id === loanId);
-            if (loan) {
-              const newPrincipal = Math.max(0, loan.outstandingPrincipal - principal);
-              await updateDoc(doc(db, "loans", loanId), { outstandingPrincipal: newPrincipal });
-            }
-          }
-        }
-
-        if (fromAccId && (type === 'EXPENSE' || type === 'TRANSFER' || type === 'LOAN_EMI')) {
+        if (fromAccId && (type === 'EXPENSE' || type === 'TRANSFER')) {
           const fromAcc = window.AppState.accounts.find(a => a.id === fromAccId);
           if (fromAcc) {
             await updateDoc(doc(db, "accounts", fromAccId), { balance: fromAcc.balance - amount });
@@ -2542,8 +2190,7 @@
 Current Date: ${new Date().toISOString().split('T')[0]}.
 Current Data:
 - Bank Accounts: ${JSON.stringify(window.AppState.accounts.map(a => ({ id: a.id, name: a.name, balance: a.balance })))}
-- Standard Chartered Home Loan: Effective Principal ₹35,27,961, EMI ₹32,480, 204 months left.
-- Other Loans: ${JSON.stringify(window.AppState.loans.map(l => ({ id: l.id, name: l.name, principal: l.outstandingPrincipal, emi: l.emiAmount })))}
+- Receivables: ${JSON.stringify(window.AppState.entities.map(e => ({ name: e.name, amount: e.amount })))}
 - Vehicles: ${JSON.stringify(window.AppState.vehicles.map(v => ({ id: v.id, name: v.name, insuranceDue: v.insuranceExpiry, odo: v.currentOdometer })))}
 - Health: ${JSON.stringify(window.AppState.healthCycles.map(h => ({ name: h.name, nextDue: h.nextDueDate })))}
 
@@ -2623,6 +2270,10 @@ Return JSON ONLY:
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
       const navBtn = document.getElementById(`nav-${tabId}`);
       if (navBtn) navBtn.classList.replace('text-slate-400', 'text-brand-400');
+
+      if (tabId === 'reports') {
+        renderExpenseReports();
+      }
     };
 
     window.openModal = function(id) { document.getElementById(id).classList.remove('hidden'); };
@@ -2649,8 +2300,7 @@ Return JSON ONLY:
         'EXPENSE': 'typeBtnExpense',
         'INCOME': 'typeBtnIncome',
         'TRANSFER': 'typeBtnTransfer',
-        'MULTI_TRANSFER': 'typeBtnMultiTransfer',
-        'LOAN_EMI': 'typeBtnEmi'
+        'MULTI_TRANSFER': 'typeBtnMultiTransfer'
       };
 
       const activeBtn = document.getElementById(btnIdMap[type]);
@@ -2658,14 +2308,12 @@ Return JSON ONLY:
 
       const toAccBox = document.getElementById('toAccountContainer');
       const multiBox = document.getElementById('multiTransferContainer');
-      const emiBox = document.getElementById('emiSplitContainer');
       const catBox = document.getElementById('categoryContainer');
       const fromLabel = document.getElementById('fromAccountLabel');
 
       toAccBox.classList.toggle('hidden', type !== 'TRANSFER');
       multiBox.classList.toggle('hidden', type !== 'MULTI_TRANSFER');
-      emiBox.classList.toggle('hidden', type !== 'LOAN_EMI');
-      catBox.classList.toggle('hidden', type === 'TRANSFER' || type === 'MULTI_TRANSFER' || type === 'LOAN_EMI');
+      catBox.classList.toggle('hidden', type === 'TRANSFER' || type === 'MULTI_TRANSFER');
 
       if (type === 'MULTI_TRANSFER') {
         fromLabel.innerText = "Source Salary Account (From)";
@@ -2676,29 +2324,8 @@ Return JSON ONLY:
       } else {
         fromLabel.innerText = type === 'INCOME' ? 'Receiving Bank Account' : 'From Bank Account';
       }
-
-      if (type === 'LOAN_EMI') handleEmiSplitCalculation();
     };
 
-    window.openEmiPaymentModal = function(loanId) {
-      openTransactionModal('LOAN_EMI');
-      document.getElementById('txnLoanId').value = loanId;
-      const loan = window.AppState.loans.find(l => l.id === loanId);
-      if (loan) document.getElementById('txnAmount').value = loan.emiAmount;
-      handleEmiSplitCalculation();
-    };
-
-    window.openPartPaymentModal = function(loanId) {
-      openTransactionModal('LOAN_EMI');
-      document.getElementById('txnLoanId').value = loanId;
-      document.getElementById('emiOverrideToggle').checked = true;
-      toggleEmiOverride();
-      document.getElementById('txnAmount').value = 50000;
-      document.getElementById('emiPrincipalAmount').value = 50000;
-      document.getElementById('emiInterestAmount').value = 0;
-    };
-
-    window.openLoanModal = function() { openModal('loanModal'); };
     window.openVehicleModal = function() { openModal('vehicleModal'); };
     window.openServiceLogModal = function() { openModal('serviceLogModal'); };
     window.openQuickFuelModal = function() { 
@@ -2731,9 +2358,8 @@ Return JSON ONLY:
       document.getElementById('docTaskDetailsContainer').classList.toggle('hidden', !checked);
     };
 
-    // Initialize App & Render Homesaver Data
+    // Initialize App & Real-time Listeners
     initListeners();
-    renderHomesaverStatement();
     lucide.createIcons();
   </script>
 </body>
