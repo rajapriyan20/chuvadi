@@ -39,7 +39,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* Mobile-optimized smooth scroll & tap styles */
     * { -webkit-tap-highlight-color: transparent; }
     body { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -139,11 +138,11 @@
             <span class="text-xs font-semibold text-white">Add Income</span>
           </button>
 
-          <button onclick="openTransactionModal('TRANSFER')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
-              <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+          <button onclick="openTransactionModal('MULTI_TRANSFER')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <i data-lucide="split" class="w-5 h-5"></i>
             </div>
-            <span class="text-xs font-semibold text-white">Transfer Funds</span>
+            <span class="text-xs font-semibold text-white">Salary Split (1→N)</span>
           </button>
 
           <button onclick="openQuickFuelModal()" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
@@ -163,7 +162,7 @@
         </div>
         <div id="dashRecentTxns" class="space-y-2">
           <div class="text-center py-6 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">
-            No recent transactions logged. Tap "Log Expense" or use Voice to get started.
+            No recent transactions logged. Tap a quick action or use Voice.
           </div>
         </div>
       </div>
@@ -174,7 +173,7 @@
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-lg font-bold text-white">Accounts & Ledger</h2>
-          <p class="text-xs text-slate-400">Manage bank accounts, assets, income & expenses</p>
+          <p class="text-xs text-slate-400">Tap any account to inspect its full Passbook statement</p>
         </div>
         <div class="flex gap-2">
           <button onclick="openAccountModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
@@ -183,9 +182,12 @@
         </div>
       </div>
 
-      <!-- Account Buckets by Purpose -->
+      <!-- Account Buckets (Clickable Passbooks) -->
       <div class="space-y-3">
-        <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Your Accounts</span>
+        <div class="flex justify-between items-center">
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Bank Accounts & Assets (Passbook View)</span>
+          <span class="text-[11px] text-slate-500 italic">Tap card to view statement</span>
+        </div>
         <div id="accountsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <!-- Loaded dynamically -->
         </div>
@@ -214,7 +216,8 @@
               <option value="ALL">All Types</option>
               <option value="EXPENSE">Expenses</option>
               <option value="INCOME">Income</option>
-              <option value="TRANSFER">Transfers</option>
+              <option value="TRANSFER">Single Transfers</option>
+              <option value="MULTI_TRANSFER">Salary / Split Transfers</option>
               <option value="LOAN_EMI">Loan EMIs</option>
             </select>
           </div>
@@ -319,7 +322,6 @@
 
     <!-- TAB 5: THE VAULT & CLINIC (DOCS & HEALTH) -->
     <section id="tab-vault" class="tab-page space-y-6 hidden">
-      <!-- Section Header -->
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-lg font-bold text-white">The Vault & Clinic</h2>
@@ -440,53 +442,84 @@
 
   <!-- ================= MODALS CONTAINER ================= -->
 
-  <!-- 1. Transaction Modal (Expense / Income / Transfer / EMI) -->
+  <!-- 1. Transaction Modal (Create / Edit / Replicate / Multi-Split Transfer) -->
   <div id="txnModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
       <div class="flex justify-between items-center">
-        <h3 id="txnModalTitle" class="text-base font-bold text-white">Log Transaction</h3>
+        <div>
+          <h3 id="txnModalTitle" class="text-base font-bold text-white">Log Transaction</h3>
+          <p id="txnModalSubtitle" class="text-[11px] text-slate-400">Record a new movement of funds</p>
+        </div>
         <button onclick="closeModal('txnModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <form id="txnForm" onsubmit="saveTransaction(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="txnEditId" value="" />
         <input type="hidden" id="txnTypeInput" value="EXPENSE" />
 
         <!-- Transaction Type Switcher -->
-        <div class="grid grid-cols-4 gap-1 p-1 bg-dark-bg rounded-xl border border-dark-border">
+        <div class="grid grid-cols-5 gap-1 p-1 bg-dark-bg rounded-xl border border-dark-border text-[11px]">
           <button type="button" onclick="setTxnType('EXPENSE')" id="typeBtnExpense" class="py-1.5 rounded-lg font-semibold text-center transition bg-rose-500/20 text-rose-300">Expense</button>
           <button type="button" onclick="setTxnType('INCOME')" id="typeBtnIncome" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">Income</button>
           <button type="button" onclick="setTxnType('TRANSFER')" id="typeBtnTransfer" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">Transfer</button>
+          <button type="button" onclick="setTxnType('MULTI_TRANSFER')" id="typeBtnMultiTransfer" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">Split(1→N)</button>
           <button type="button" onclick="setTxnType('LOAN_EMI')" id="typeBtnEmi" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">EMI</button>
         </div>
 
-        <div>
-          <label class="block text-slate-400 mb-1">Date</label>
-          <input type="date" id="txnDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
-        </div>
-
-        <div>
-          <label class="block text-slate-400 mb-1">Total Amount (₹)</label>
-          <input type="number" step="0.01" id="txnAmount" required oninput="handleEmiSplitCalculation()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold text-sm focus:outline-none focus:border-brand-500" placeholder="0.00" />
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Date</label>
+            <input type="date" id="txnDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div id="totalAmountContainer">
+            <label class="block text-slate-400 mb-1" id="amountLabel">Total Amount (₹)</label>
+            <input type="number" step="0.01" id="txnAmount" required oninput="handleEmiSplitCalculation()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold text-sm focus:outline-none focus:border-brand-500" placeholder="0.00" />
+          </div>
         </div>
 
         <!-- Dynamic Account Fields based on Type -->
         <div id="fromAccountContainer">
-          <label class="block text-slate-400 mb-1" id="fromAccountLabel">From Bank Account</label>
+          <label class="block text-slate-400 mb-1" id="fromAccountLabel">From Account (Source)</label>
           <select id="txnFromAccount" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
             <!-- Loaded dynamically -->
           </select>
         </div>
 
+        <!-- Single Transfer Target -->
         <div id="toAccountContainer" class="hidden">
-          <label class="block text-slate-400 mb-1">To Bank Account</label>
+          <label class="block text-slate-400 mb-1">To Account (Destination)</label>
           <select id="txnToAccount" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
             <!-- Loaded dynamically -->
           </select>
         </div>
 
+        <!-- Multi-Destination Transfer (Salary Split to up to 7+ Accounts) -->
+        <div id="multiTransferContainer" class="hidden space-y-3 p-3 bg-dark-bg/90 rounded-2xl border border-purple-500/30">
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="font-bold text-white text-xs flex items-center gap-1.5">
+                <i data-lucide="split" class="w-3.5 h-3.5 text-purple-400"></i> Salary Distribution / Multi-Contra
+              </span>
+              <p class="text-[10px] text-slate-400">Distribute funds from source into multiple target accounts</p>
+            </div>
+            <button type="button" onclick="addMultiTransferRow()" class="px-2 py-1 bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 border border-purple-500/40 rounded-lg text-[10px] font-semibold flex items-center gap-1">
+              <i data-lucide="plus" class="w-3 h-3"></i> Add Account
+            </button>
+          </div>
+
+          <div id="multiTransferRows" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar">
+            <!-- Dynamic rows populated here -->
+          </div>
+
+          <div class="pt-2 border-t border-dark-border/60 flex justify-between items-center text-xs">
+            <span class="text-slate-400">Sum of Distributions:</span>
+            <span id="multiTransferTotalSum" class="font-bold text-purple-300 text-sm">₹0.00</span>
+          </div>
+        </div>
+
         <div id="categoryContainer">
           <label class="block text-slate-400 mb-1">Category / Tag</label>
-          <input type="text" id="txnCategory" list="categorySuggestions" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Fuel, Groceries, Salary, Maintenance" />
+          <input type="text" id="txnCategory" list="categorySuggestions" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Fuel, Salary, Groceries, Bank Interest" />
           <datalist id="categorySuggestions">
             <option value="Fuel / Petrol"></option>
             <option value="Vehicle Maintenance"></option>
@@ -499,7 +532,7 @@
           </datalist>
         </div>
 
-        <!-- EMI Split Container (Auto-calculated with Override) -->
+        <!-- EMI Split Container -->
         <div id="emiSplitContainer" class="hidden space-y-2 p-3 bg-dark-bg/80 rounded-xl border border-brand-500/30">
           <div class="flex justify-between items-center">
             <span class="font-bold text-white">EMI Principal / Interest Split</span>
@@ -531,14 +564,45 @@
           <input type="text" id="txnNotes" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="Optional notes" />
         </div>
 
-        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+        <button type="submit" id="txnSubmitBtn" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
           Save Transaction
         </button>
       </form>
     </div>
   </div>
 
-  <!-- 2. Account Modal (Create Bank, Investment, Asset) -->
+  <!-- 2. Account Passbook Modal (View account statement & transactions) -->
+  <div id="passbookModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-start border-b border-dark-border/60 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 id="pbAccountName" class="text-base font-bold text-white">Account Passbook</h3>
+            <p id="pbAccountPurpose" class="text-xs text-slate-400">Detailed Statement & History</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] text-slate-400 block uppercase font-semibold">Current Balance</span>
+          <span id="pbAccountBalance" class="text-lg font-extrabold text-emerald-400">₹0</span>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center text-xs">
+        <span class="font-bold text-slate-300">Transaction Statement</span>
+        <button onclick="closeModal('passbookModal')" class="p-1 rounded-lg text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- Statement list container -->
+      <div id="pbTxnList" class="space-y-2 overflow-y-auto no-scrollbar flex-1 pr-1">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Account Modal (Create Bank, Investment, Asset) -->
   <div id="accountModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -578,7 +642,7 @@
     </div>
   </div>
 
-  <!-- 3. Loan Modal -->
+  <!-- 4. Loan Modal -->
   <div id="loanModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
       <div class="flex justify-between items-center">
@@ -654,7 +718,7 @@
     </div>
   </div>
 
-  <!-- 4. Vehicle Modal -->
+  <!-- 5. Vehicle Modal -->
   <div id="vehicleModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -700,7 +764,7 @@
     </div>
   </div>
 
-  <!-- 5. Fuel & Service Modal -->
+  <!-- 6. Fuel & Service Modal -->
   <div id="serviceLogModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -750,7 +814,7 @@
 
         <div>
           <label class="block text-slate-400 mb-1">Details / Notes</label>
-          <input type="text" id="logDetails" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Full tank at Shell, Mobil 1 Synthetic Oil, Brake pad change" />
+          <input type="text" id="logDetails" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Full tank at Shell, Mobil 1 Synthetic Oil" />
         </div>
 
         <label class="flex items-center gap-2 text-slate-300">
@@ -765,7 +829,7 @@
     </div>
   </div>
 
-  <!-- 6. Health Dose Modal (Recurring Cycles) -->
+  <!-- 7. Health Dose Modal -->
   <div id="healthModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -802,7 +866,7 @@
     </div>
   </div>
 
-  <!-- 7. Document & Task Modal -->
+  <!-- 8. Document & Task Modal -->
   <div id="docModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -833,7 +897,6 @@
           </div>
         </div>
 
-        <!-- Linked To-Do Task -->
         <div class="p-3 bg-dark-bg rounded-xl border border-dark-border space-y-2">
           <label class="flex items-center gap-2 font-bold text-white">
             <input type="checkbox" id="docHasTask" onchange="toggleDocTaskFields()" class="rounded border-dark-border" />
@@ -852,7 +915,7 @@
     </div>
   </div>
 
-  <!-- 8. Entity / Person Modal (Receivables / Payables) -->
+  <!-- 9. Entity / Person Modal -->
   <div id="entityModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -882,7 +945,7 @@
 
         <div>
           <label class="block text-slate-400 mb-1">Reason / Notes</label>
-          <input type="text" id="entityNotes" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Trip bill split, borrowed for bike repair" />
+          <input type="text" id="entityNotes" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Trip bill split, borrowed for repair" />
         </div>
 
         <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
@@ -892,7 +955,7 @@
     </div>
   </div>
 
-  <!-- 9. Settings Modal (Gemini API Key Setup) -->
+  <!-- 10. Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -903,7 +966,7 @@
       <div class="space-y-4 text-xs">
         <div>
           <label class="block text-slate-300 font-semibold mb-1">Gemini API Key (For Voice AI)</label>
-          <p class="text-slate-400 text-[11px] mb-2">Get a free key from <a href="https://aistudio.google.com" target="_blank" class="text-brand-400 underline">Google AI Studio</a>. Saved locally in your browser.</p>
+          <p class="text-slate-400 text-[11px] mb-2">Get a key from <a href="https://aistudio.google.com" target="_blank" class="text-brand-400 underline">Google AI Studio</a>. Saved locally in your browser.</p>
           <input type="password" id="geminiApiKeyInput" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="AIzaSy..." />
         </div>
 
@@ -951,7 +1014,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Global In-Memory Reactive Cache
+    // Global In-Memory Reactive State
     window.AppState = {
       accounts: [],
       loans: [],
@@ -961,10 +1024,10 @@
       vehicleLogs: [],
       healthCycles: [],
       documents: [],
-      geminiKey: localStorage.getItem('chuvadi_gemini_key') || ''
+      geminiKey: localStorage.getItem('chuvadi_gemini_key') || '',
+      activePassbookAccountId: null
     };
 
-    // Date formatting helper
     function formatDate(d) {
       if (!d) return '';
       const date = new Date(d);
@@ -974,7 +1037,6 @@
       return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
     }
 
-    // Initialize Header Date
     document.getElementById('headerDate').innerText = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     document.getElementById('txnDate').valueAsDate = new Date();
     document.getElementById('logDate').valueAsDate = new Date();
@@ -984,15 +1046,16 @@
     // REAL-TIME FIRESTORE SUBSCRIPTIONS
     // ----------------------------------------------------
     function initListeners() {
-      // 1. Accounts
       onSnapshot(collection(db, "accounts"), (snap) => {
         window.AppState.accounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderAccounts();
         updateDashboardMetrics();
         populateAccountSelects();
+        if (window.AppState.activePassbookAccountId) {
+          renderPassbook(window.AppState.activePassbookAccountId);
+        }
       });
 
-      // 2. Loans
       onSnapshot(collection(db, "loans"), (snap) => {
         window.AppState.loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderLoans();
@@ -1001,22 +1064,22 @@
         runPrepaymentSim();
       });
 
-      // 3. Transactions
       onSnapshot(query(collection(db, "transactions"), orderBy("date", "desc")), (snap) => {
         window.AppState.transactions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderTransactionHistory();
         renderRecentTransactions();
         updateDashboardMetrics();
+        if (window.AppState.activePassbookAccountId) {
+          renderPassbook(window.AppState.activePassbookAccountId);
+        }
       });
 
-      // 4. Receivables & Payables
       onSnapshot(collection(db, "receivables_payables"), (snap) => {
         window.AppState.entities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderEntities();
         updateDashboardMetrics();
       });
 
-      // 5. Vehicles
       onSnapshot(collection(db, "vehicles"), (snap) => {
         window.AppState.vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderVehicles();
@@ -1024,20 +1087,17 @@
         checkUrgentAlerts();
       });
 
-      // 6. Vehicle Logs
       onSnapshot(query(collection(db, "vehicle_logs"), orderBy("date", "desc")), (snap) => {
         window.AppState.vehicleLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderVehicleLogs();
       });
 
-      // 7. Health Cycles
       onSnapshot(collection(db, "health_logs"), (snap) => {
         window.AppState.healthCycles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderHealthCycles();
         checkUrgentAlerts();
       });
 
-      // 8. Documents & Tasks
       onSnapshot(collection(db, "documents"), (snap) => {
         window.AppState.documents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderDocuments();
@@ -1079,7 +1139,6 @@
       const alerts = [];
       const today = new Date();
 
-      // Vehicle Insurance Alerts (within 30 days or overdue)
       window.AppState.vehicles.forEach(v => {
         if (v.insuranceExpiry) {
           const exp = new Date(v.insuranceExpiry);
@@ -1095,7 +1154,6 @@
         }
       });
 
-      // Health Recurring Cycles (e.g. Albendazole due)
       window.AppState.healthCycles.forEach(h => {
         if (h.nextDueDate) {
           const due = new Date(h.nextDueDate);
@@ -1111,7 +1169,6 @@
         }
       });
 
-      // Document Action Items / Tasks
       window.AppState.documents.forEach(d => {
         if (d.hasTask && !d.taskCompleted) {
           alerts.push({
@@ -1145,6 +1202,7 @@
       }
     }
 
+    // Passbook Click Feature
     function renderAccounts() {
       const container = document.getElementById('accountsList');
       if (window.AppState.accounts.length === 0) {
@@ -1152,29 +1210,117 @@
         return;
       }
       container.innerHTML = window.AppState.accounts.map(acc => `
-        <div class="bg-dark-card border border-dark-border p-4 rounded-2xl flex justify-between items-start">
+        <div onclick="openPassbookModal('${acc.id}')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-4 rounded-2xl flex justify-between items-start cursor-pointer transition shadow-md group">
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-white">${acc.name}</span>
+              <span class="text-xs font-bold text-white group-hover:text-brand-300 transition">${acc.name}</span>
               <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${acc.type === 'LIQUID_BANK' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : acc.type === 'INVESTMENT_PF' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
                 ${acc.type === 'LIQUID_BANK' ? 'Liquid' : acc.type === 'INVESTMENT_PF' ? 'Investment' : 'Fixed Asset'}
               </span>
             </div>
-            <p class="text-[11px] text-slate-400 mt-0.5">${acc.purpose || 'General'}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+              <i data-lucide="book-open" class="w-3 h-3 text-brand-400"></i> ${acc.purpose || 'General Passbook'}
+            </p>
           </div>
           <div class="text-right">
             <span class="text-sm font-extrabold text-white block">${formatCurrency(acc.balance)}</span>
-            <button onclick="deleteDocItem('accounts', '${acc.id}')" class="text-[10px] text-slate-500 hover:text-rose-400 mt-1">Delete</button>
+            <div class="flex gap-2 justify-end mt-1" onclick="event.stopPropagation()">
+              <button onclick="deleteDocItem('accounts', '${acc.id}')" class="text-[10px] text-slate-500 hover:text-rose-400">Delete</button>
+            </div>
           </div>
         </div>
       `).join('');
       lucide.createIcons();
     }
 
+    window.openPassbookModal = function(accId) {
+      window.AppState.activePassbookAccountId = accId;
+      renderPassbook(accId);
+      openModal('passbookModal');
+    };
+
+    function renderPassbook(accId) {
+      const acc = window.AppState.accounts.find(a => a.id === accId);
+      if (!acc) return;
+
+      document.getElementById('pbAccountName').innerText = acc.name;
+      document.getElementById('pbAccountPurpose').innerText = `${acc.purpose || 'General'} • Tap entry to edit`;
+      document.getElementById('pbAccountBalance').innerText = formatCurrency(acc.balance);
+
+      const pbList = document.getElementById('pbTxnList');
+      const accountTxns = window.AppState.transactions.filter(t => {
+        if (t.fromAccountId === accId || t.toAccountId === accId) return true;
+        if (t.type === 'MULTI_TRANSFER' && (t.fromAccountId === accId || t.splits?.some(s => s.toAccountId === accId))) return true;
+        return false;
+      });
+
+      if (accountTxns.length === 0) {
+        pbList.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">No transactions recorded for this account yet.</div>`;
+        return;
+      }
+
+      pbList.innerHTML = accountTxns.map(t => {
+        let isCredit = false;
+        let transferText = '';
+        let displayAmount = t.amount;
+
+        if (t.type === 'INCOME') {
+          isCredit = true;
+        } else if (t.type === 'EXPENSE' || t.type === 'LOAN_EMI') {
+          isCredit = false;
+        } else if (t.type === 'TRANSFER') {
+          const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
+          const toAcc = window.AppState.accounts.find(a => a.id === t.toAccountId);
+          if (t.toAccountId === accId) {
+            isCredit = true;
+            transferText = `Transfer In from ${fromAcc ? fromAcc.name : 'Account'}`;
+          } else {
+            isCredit = false;
+            transferText = `Transfer Out to ${toAcc ? toAcc.name : 'Account'}`;
+          }
+        } else if (t.type === 'MULTI_TRANSFER') {
+          if (t.fromAccountId === accId) {
+            isCredit = false;
+            transferText = `Salary / Multi-Split Out to ${t.splits?.length || 0} Accounts`;
+          } else {
+            const splitMatch = t.splits?.find(s => s.toAccountId === accId);
+            isCredit = true;
+            displayAmount = splitMatch ? splitMatch.amount : t.amount;
+            const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
+            transferText = `Salary Split In from ${fromAcc ? fromAcc.name : 'Main Account'}`;
+          }
+        }
+
+        return `
+          <div class="p-3 bg-dark-bg/90 border border-dark-border/80 rounded-xl text-xs flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg ${isCredit ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} flex items-center justify-center font-bold">
+                <i data-lucide="${isCredit ? 'arrow-down-left' : 'arrow-up-right'}" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <span class="font-bold text-white block">${transferText || t.category || t.type}</span>
+                <span class="text-[10px] text-slate-400">${formatDate(t.date)} ${t.notes ? '• ' + t.notes : ''}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-bold ${isCredit ? 'text-emerald-400' : 'text-rose-400'} block text-sm">
+                ${isCredit ? '+' : '-'} ${formatCurrency(displayAmount)}
+              </span>
+              <div class="flex gap-2 justify-end mt-0.5">
+                <button onclick="editTransaction('${t.id}')" class="text-[10px] text-brand-400 hover:underline">Edit</button>
+                <button onclick="duplicateTransaction('${t.id}')" class="text-[10px] text-slate-400 hover:underline">Clone</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
     function renderLoans() {
       const container = document.getElementById('loansList');
       if (window.AppState.loans.length === 0) {
-        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No active loans configured. Tap "+ Add Loan" to set up your Home or Car loan tracking.</div>`;
+        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No active loans configured. Tap "+ Add Loan" to track debt payoff.</div>`;
         return;
       }
 
@@ -1274,26 +1420,56 @@
       lucide.createIcons();
     }
 
+    // Render Transaction Item with From->To details and Edit/Clone buttons
     function renderTxnItem(t) {
       const isExpense = t.type === 'EXPENSE' || t.type === 'LOAN_EMI';
       const isIncome = t.type === 'INCOME';
+      const isTransfer = t.type === 'TRANSFER' || t.type === 'MULTI_TRANSFER';
       const color = isIncome ? 'text-emerald-400' : isExpense ? 'text-rose-400' : 'text-blue-400';
       const prefix = isIncome ? '+' : isExpense ? '-' : '⇄';
 
+      // Build transfer path text
+      let subtitleDetail = '';
+      if (t.type === 'TRANSFER') {
+        const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
+        const toAcc = window.AppState.accounts.find(a => a.id === t.toAccountId);
+        subtitleDetail = `<span class="text-brand-300 font-semibold">${fromAcc ? fromAcc.name : 'From Account'}</span> <span class="text-slate-500">→</span> <span class="text-indigo-300 font-semibold">${toAcc ? toAcc.name : 'To Account'}</span>`;
+      } else if (t.type === 'MULTI_TRANSFER') {
+        const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
+        subtitleDetail = `<span class="text-purple-300 font-semibold">${fromAcc ? fromAcc.name : 'Main Account'}</span> <span class="text-slate-500">→</span> <span class="text-brand-300 font-semibold">${t.splits?.length || 0} Accounts Split</span>`;
+      } else {
+        const fromAcc = window.AppState.accounts.find(a => a.id === t.fromAccountId);
+        subtitleDetail = `${fromAcc ? fromAcc.name + ' • ' : ''}${t.notes ? t.notes : ''}`;
+      }
+
       return `
-        <div class="flex justify-between items-center p-3 bg-dark-card border border-dark-border rounded-xl text-xs">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg ${isIncome ? 'bg-emerald-500/10 text-emerald-400' : isExpense ? 'bg-rose-500/10 text-rose-400' : 'bg-blue-500/10 text-blue-400'} flex items-center justify-center">
+        <div class="p-3 bg-dark-card border border-dark-border rounded-xl text-xs flex justify-between items-center space-x-2">
+          <div class="flex items-center gap-3 min-w-0 flex-1">
+            <div class="w-8 h-8 rounded-lg shrink-0 ${isIncome ? 'bg-emerald-500/10 text-emerald-400' : isExpense ? 'bg-rose-500/10 text-rose-400' : 'bg-blue-500/10 text-blue-400'} flex items-center justify-center">
               <i data-lucide="${isIncome ? 'arrow-down-left' : isExpense ? 'arrow-up-right' : 'arrow-left-right'}" class="w-4 h-4"></i>
             </div>
-            <div>
-              <span class="font-bold text-white block">${t.category || t.type}</span>
-              <span class="text-[11px] text-slate-400">${formatDate(t.date)} ${t.notes ? '• ' + t.notes : ''}</span>
+            <div class="truncate">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="font-bold text-white truncate">${t.category || t.type}</span>
+                ${t.type === 'MULTI_TRANSFER' ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase font-bold">Split</span>' : ''}
+              </div>
+              <p class="text-[11px] text-slate-400 truncate">${formatDate(t.date)} • ${subtitleDetail}</p>
             </div>
           </div>
-          <div class="text-right">
+
+          <div class="text-right shrink-0">
             <span class="font-bold ${color} block text-sm">${prefix} ${formatCurrency(t.amount)}</span>
-            <button onclick="deleteDocItem('transactions', '${t.id}')" class="text-[10px] text-slate-500 hover:text-rose-400">Delete</button>
+            <div class="flex gap-2 justify-end mt-1 text-[10px]">
+              <button onclick="editTransaction('${t.id}')" class="text-brand-400 hover:text-brand-300 font-medium flex items-center gap-0.5">
+                <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+              </button>
+              <button onclick="duplicateTransaction('${t.id}')" class="text-slate-400 hover:text-white font-medium flex items-center gap-0.5">
+                <i data-lucide="copy" class="w-3 h-3"></i> Clone
+              </button>
+              <button onclick="deleteDocItem('transactions', '${t.id}')" class="text-slate-500 hover:text-rose-400">
+                <i data-lucide="trash" class="w-3 h-3"></i>
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -1446,7 +1622,50 @@
     }
 
     // ----------------------------------------------------
-    // PREPAYMENT SIMULATOR MATH
+    // MULTI-TRANSFER SPLIT ENGINE (1 -> N SALARY DISTRIBUTION)
+    // ----------------------------------------------------
+    window.addMultiTransferRow = function(targetAccId = '', amount = '', note = '') {
+      const container = document.getElementById('multiTransferRows');
+      const rowId = 'split_row_' + Math.random().toString(36).substr(2, 9);
+      const accOptions = window.AppState.accounts.map(a => `<option value="${a.id}" ${a.id === targetAccId ? 'selected' : ''}>${a.name}</option>`).join('');
+
+      const rowHtml = document.createElement('div');
+      rowHtml.id = rowId;
+      rowHtml.className = "grid grid-cols-12 gap-1.5 items-center p-2 bg-dark-card rounded-xl border border-dark-border";
+      rowHtml.innerHTML = `
+        <div class="col-span-5">
+          <select class="split-target w-full bg-dark-bg border border-dark-border rounded-lg p-1.5 text-white text-[11px] focus:outline-none">
+            ${accOptions}
+          </select>
+        </div>
+        <div class="col-span-3">
+          <input type="number" step="0.01" value="${amount}" oninput="calculateMultiTransferTotal()" placeholder="₹ Amount" class="split-amount w-full bg-dark-bg border border-dark-border rounded-lg p-1.5 text-white text-[11px] font-bold focus:outline-none" />
+        </div>
+        <div class="col-span-3">
+          <input type="text" value="${note}" placeholder="Note (e.g. SIP)" class="split-note w-full bg-dark-bg border border-dark-border rounded-lg p-1.5 text-white text-[11px] focus:outline-none" />
+        </div>
+        <div class="col-span-1 text-center">
+          <button type="button" onclick="document.getElementById('${rowId}').remove(); calculateMultiTransferTotal();" class="text-slate-500 hover:text-rose-400">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      `;
+      container.appendChild(rowHtml);
+      lucide.createIcons();
+      calculateMultiTransferTotal();
+    };
+
+    window.calculateMultiTransferTotal = function() {
+      let total = 0;
+      document.querySelectorAll('.split-amount').forEach(inp => {
+        total += parseFloat(inp.value) || 0;
+      });
+      document.getElementById('multiTransferTotalSum').innerText = formatCurrency(total);
+      document.getElementById('txnAmount').value = total.toFixed(2);
+    };
+
+    // ----------------------------------------------------
+    // PREPAYMENT SIMULATOR
     // ----------------------------------------------------
     window.runPrepaymentSim = function() {
       const loanId = document.getElementById('simLoanSelect').value;
@@ -1466,7 +1685,6 @@
         return;
       }
 
-      // Remaining months formula: n = -ln(1 - P*r/E) / ln(1 + r)
       const nNew = Math.ceil(-Math.log(1 - (P * r) / E) / Math.log(1 + r));
       const nOld = Math.ceil(-Math.log(1 - (loan.outstandingPrincipal * r) / loan.emiAmount) / Math.log(1 + r)) || 240;
 
@@ -1491,7 +1709,7 @@
       if (type !== 'LOAN_EMI') return;
 
       const override = document.getElementById('emiOverrideToggle').checked;
-      if (override) return; // User is manually overriding
+      if (override) return;
 
       const loanId = document.getElementById('txnLoanId').value;
       const loan = window.AppState.loans.find(l => l.id === loanId);
@@ -1511,6 +1729,104 @@
       document.getElementById('emiPrincipalAmount').readOnly = !override;
       document.getElementById('emiInterestAmount').readOnly = !override;
     };
+
+    // ----------------------------------------------------
+    // EDIT & DUPLICATE TRANSACTION HANDLERS
+    // ----------------------------------------------------
+    window.editTransaction = function(txnId) {
+      const t = window.AppState.transactions.find(item => item.id === txnId);
+      if (!t) return;
+
+      document.getElementById('txnEditId').value = t.id;
+      document.getElementById('txnModalTitle').innerText = "Edit Transaction";
+      document.getElementById('txnModalSubtitle').innerText = "Update amounts, dates, or splits";
+      document.getElementById('txnSubmitBtn').innerText = "Update Transaction";
+
+      setTxnType(t.type);
+      document.getElementById('txnDate').value = t.date;
+      document.getElementById('txnAmount').value = t.amount;
+      document.getElementById('txnCategory').value = t.category || '';
+      document.getElementById('txnNotes').value = t.notes || '';
+
+      if (t.fromAccountId) document.getElementById('txnFromAccount').value = t.fromAccountId;
+      if (t.toAccountId) document.getElementById('txnToAccount').value = t.toAccountId;
+
+      if (t.type === 'MULTI_TRANSFER' && t.splits) {
+        document.getElementById('multiTransferRows').innerHTML = '';
+        t.splits.forEach(s => addMultiTransferRow(s.toAccountId, s.amount, s.note));
+      }
+
+      if (t.type === 'LOAN_EMI' && t.loanId) {
+        document.getElementById('txnLoanId').value = t.loanId;
+        if (t.split) {
+          document.getElementById('emiPrincipalAmount').value = t.split.principal || 0;
+          document.getElementById('emiInterestAmount').value = t.split.interest || 0;
+          document.getElementById('emiOverrideToggle').checked = !!t.split.overridden;
+          toggleEmiOverride();
+        }
+      }
+
+      openModal('txnModal');
+    };
+
+    window.duplicateTransaction = function(txnId) {
+      const t = window.AppState.transactions.find(item => item.id === txnId);
+      if (!t) return;
+
+      document.getElementById('txnEditId').value = '';
+      document.getElementById('txnModalTitle').innerText = "Clone Transaction";
+      document.getElementById('txnModalSubtitle').innerText = "Duplicate entry with today's date";
+      document.getElementById('txnSubmitBtn').innerText = "Save Cloned Transaction";
+
+      setTxnType(t.type);
+      document.getElementById('txnDate').valueAsDate = new Date();
+      document.getElementById('txnAmount').value = t.amount;
+      document.getElementById('txnCategory').value = t.category || '';
+      document.getElementById('txnNotes').value = t.notes ? `${t.notes} (Copy)` : '';
+
+      if (t.fromAccountId) document.getElementById('txnFromAccount').value = t.fromAccountId;
+      if (t.toAccountId) document.getElementById('txnToAccount').value = t.toAccountId;
+
+      if (t.type === 'MULTI_TRANSFER' && t.splits) {
+        document.getElementById('multiTransferRows').innerHTML = '';
+        t.splits.forEach(s => addMultiTransferRow(s.toAccountId, s.amount, s.note));
+      }
+
+      openModal('txnModal');
+    };
+
+    // Rollback helper when editing an existing transaction
+    async function rollbackTransactionBalances(oldTxn) {
+      const amt = Number(oldTxn.amount) || 0;
+      if (oldTxn.type === 'EXPENSE' && oldTxn.fromAccountId) {
+        const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
+        if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + amt });
+      } else if (oldTxn.type === 'INCOME' && oldTxn.fromAccountId) {
+        const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
+        if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance - amt });
+      } else if (oldTxn.type === 'TRANSFER') {
+        const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
+        const to = window.AppState.accounts.find(a => a.id === oldTxn.toAccountId);
+        if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + amt });
+        if (to) await updateDoc(doc(db, "accounts", oldTxn.toAccountId), { balance: to.balance - amt });
+      } else if (oldTxn.type === 'MULTI_TRANSFER') {
+        const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
+        if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + amt });
+        if (oldTxn.splits) {
+          for (const s of oldTxn.splits) {
+            const toAcc = window.AppState.accounts.find(a => a.id === s.toAccountId);
+            if (toAcc) await updateDoc(doc(db, "accounts", s.toAccountId), { balance: toAcc.balance - (Number(s.amount) || 0) });
+          }
+        }
+      } else if (oldTxn.type === 'LOAN_EMI') {
+        const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
+        if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + amt });
+        if (oldTxn.loanId && oldTxn.split?.principal) {
+          const loan = window.AppState.loans.find(l => l.id === oldTxn.loanId);
+          if (loan) await updateDoc(doc(db, "loans", oldTxn.loanId), { outstandingPrincipal: loan.outstandingPrincipal + oldTxn.split.principal });
+        }
+      }
+    }
 
     // ----------------------------------------------------
     // FIRESTORE ACTIONS & FORM HANDLERS
@@ -1549,10 +1865,17 @@
 
     window.saveTransaction = async function(e) {
       e.preventDefault();
+      const editId = document.getElementById('txnEditId').value;
       const type = document.getElementById('txnTypeInput').value;
       const amount = parseFloat(document.getElementById('txnAmount').value) || 0;
       const fromAccId = document.getElementById('txnFromAccount').value;
       const toAccId = document.getElementById('txnToAccount').value;
+
+      // If editing, rollback old transaction balances first
+      if (editId) {
+        const oldTxn = window.AppState.transactions.find(t => t.id === editId);
+        if (oldTxn) await rollbackTransactionBalances(oldTxn);
+      }
 
       const txnData = {
         type: type,
@@ -1560,49 +1883,82 @@
         amount: amount,
         fromAccountId: fromAccId,
         toAccountId: type === 'TRANSFER' ? toAccId : null,
-        category: document.getElementById('txnCategory').value || type,
+        category: document.getElementById('txnCategory').value || (type === 'MULTI_TRANSFER' ? 'Salary Distribution' : type),
         notes: document.getElementById('txnNotes').value,
         createdAt: serverTimestamp()
       };
 
-      if (type === 'LOAN_EMI') {
-        const loanId = document.getElementById('txnLoanId').value;
-        const principal = parseFloat(document.getElementById('emiPrincipalAmount').value) || 0;
-        const interest = parseFloat(document.getElementById('emiInterestAmount').value) || 0;
-        txnData.loanId = loanId;
-        txnData.split = { principal, interest, overridden: document.getElementById('emiOverrideToggle').checked };
+      // Handle Multi-Destination Transfer (Salary Split to multiple accounts)
+      if (type === 'MULTI_TRANSFER') {
+        const splits = [];
+        document.querySelectorAll('#multiTransferRows > div').forEach(row => {
+          const targetId = row.querySelector('.split-target').value;
+          const splitAmt = parseFloat(row.querySelector('.split-amount').value) || 0;
+          const splitNote = row.querySelector('.split-note').value;
+          if (targetId && splitAmt > 0) {
+            splits.push({ toAccountId: targetId, amount: splitAmt, note: splitNote });
+          }
+        });
+        txnData.splits = splits;
 
-        // Deduct principal from loan account
-        const loan = window.AppState.loans.find(l => l.id === loanId);
-        if (loan) {
-          const newPrincipal = Math.max(0, loan.outstandingPrincipal - principal);
-          await updateDoc(doc(db, "loans", loanId), { outstandingPrincipal: newPrincipal });
-        }
-      }
-
-      // Update bank account balances
-      if (fromAccId && (type === 'EXPENSE' || type === 'TRANSFER' || type === 'LOAN_EMI')) {
+        // Deduct full amount from Source Account
         const fromAcc = window.AppState.accounts.find(a => a.id === fromAccId);
         if (fromAcc) {
           await updateDoc(doc(db, "accounts", fromAccId), { balance: fromAcc.balance - amount });
         }
-      }
-      if (toAccId && type === 'TRANSFER') {
-        const toAcc = window.AppState.accounts.find(a => a.id === toAccId);
-        if (toAcc) {
-          await updateDoc(doc(db, "accounts", toAccId), { balance: toAcc.balance + amount });
+
+        // Credit each destination account
+        for (const s of splits) {
+          const targetAcc = window.AppState.accounts.find(a => a.id === s.toAccountId);
+          if (targetAcc) {
+            await updateDoc(doc(db, "accounts", s.toAccountId), { balance: targetAcc.balance + s.amount });
+          }
         }
-      }
-      if (fromAccId && type === 'INCOME') {
-        const targetAcc = window.AppState.accounts.find(a => a.id === fromAccId);
-        if (targetAcc) {
-          await updateDoc(doc(db, "accounts", fromAccId), { balance: targetAcc.balance + amount });
+      } else {
+        // Standard updates for single transactions
+        if (type === 'LOAN_EMI') {
+          const loanId = document.getElementById('txnLoanId').value;
+          const principal = parseFloat(document.getElementById('emiPrincipalAmount').value) || 0;
+          const interest = parseFloat(document.getElementById('emiInterestAmount').value) || 0;
+          txnData.loanId = loanId;
+          txnData.split = { principal, interest, overridden: document.getElementById('emiOverrideToggle').checked };
+
+          const loan = window.AppState.loans.find(l => l.id === loanId);
+          if (loan) {
+            const newPrincipal = Math.max(0, loan.outstandingPrincipal - principal);
+            await updateDoc(doc(db, "loans", loanId), { outstandingPrincipal: newPrincipal });
+          }
+        }
+
+        if (fromAccId && (type === 'EXPENSE' || type === 'TRANSFER' || type === 'LOAN_EMI')) {
+          const fromAcc = window.AppState.accounts.find(a => a.id === fromAccId);
+          if (fromAcc) {
+            await updateDoc(doc(db, "accounts", fromAccId), { balance: fromAcc.balance - amount });
+          }
+        }
+        if (toAccId && type === 'TRANSFER') {
+          const toAcc = window.AppState.accounts.find(a => a.id === toAccId);
+          if (toAcc) {
+            await updateDoc(doc(db, "accounts", toAccId), { balance: toAcc.balance + amount });
+          }
+        }
+        if (fromAccId && type === 'INCOME') {
+          const targetAcc = window.AppState.accounts.find(a => a.id === fromAccId);
+          if (targetAcc) {
+            await updateDoc(doc(db, "accounts", fromAccId), { balance: targetAcc.balance + amount });
+          }
         }
       }
 
-      await addDoc(collection(db, "transactions"), txnData);
+      if (editId) {
+        await updateDoc(doc(db, "transactions", editId), txnData);
+      } else {
+        await addDoc(collection(db, "transactions"), txnData);
+      }
+
       closeModal('txnModal');
       document.getElementById('txnForm').reset();
+      document.getElementById('txnEditId').value = '';
     };
 
     window.saveVehicle = async function(e) {
@@ -1637,12 +1993,10 @@
         createdAt: serverTimestamp()
       });
 
-      // Update vehicle current odometer
       if (vehId && odo > 0) {
         await updateDoc(doc(db, "vehicles", vehId), { currentOdometer: odo });
       }
 
-      // If sync to expense is checked
       if (document.getElementById('logSyncExpense').checked && window.AppState.accounts.length > 0) {
         await addDoc(collection(db, "transactions"), {
           type: 'EXPENSE',
@@ -1725,6 +2079,11 @@
 
     window.deleteDocItem = async function(col, id) {
       if (confirm('Delete this item permanently?')) {
+        // If deleting a transaction, revert its balance impact
+        if (col === 'transactions') {
+          const t = window.AppState.transactions.find(item => item.id === id);
+          if (t) await rollbackTransactionBalances(t);
+        }
         await deleteDoc(doc(db, col, id));
       }
     };
@@ -1793,9 +2152,9 @@
         const systemPrompt = `You are Chuvadi, a personal life OS assistant.
 Current Date: ${new Date().toISOString().split('T')[0]}.
 Current Data Context:
-- Bank Accounts: ${JSON.stringify(window.AppState.accounts.map(a => ({ name: a.name, balance: a.balance })))}
-- Loans: ${JSON.stringify(window.AppState.loans.map(l => ({ name: l.name, principal: l.outstandingPrincipal, emi: l.emiAmount })))}
-- Vehicles: ${JSON.stringify(window.AppState.vehicles.map(v => ({ name: v.name, insuranceDue: v.insuranceExpiry, odo: v.currentOdometer })))}
+- Bank Accounts: ${JSON.stringify(window.AppState.accounts.map(a => ({ id: a.id, name: a.name, balance: a.balance })))}
+- Loans: ${JSON.stringify(window.AppState.loans.map(l => ({ id: l.id, name: l.name, principal: l.outstandingPrincipal, emi: l.emiAmount })))}
+- Vehicles: ${JSON.stringify(window.AppState.vehicles.map(v => ({ id: v.id, name: v.name, insuranceDue: v.insuranceExpiry, odo: v.currentOdometer })))}
 - Health Cycles: ${JSON.stringify(window.AppState.healthCycles.map(h => ({ name: h.name, nextDue: h.nextDueDate })))}
 
 You can execute actions by returning JSON ONLY with this schema:
@@ -1823,7 +2182,6 @@ You can execute actions by returning JSON ONLY with this schema:
         const result = await response.json();
         const parsed = JSON.parse(result.candidates[0].content.parts[0].text);
 
-        // Execute function call actions
         if (parsed.action === 'LOG_EXPENSE' && parsed.data.amount) {
           const accId = window.AppState.accounts[0]?.id || null;
           await addDoc(collection(db, "transactions"), {
@@ -1853,7 +2211,6 @@ You can execute actions by returning JSON ONLY with this schema:
 
         replyBox.innerText = parsed.speechReply || "Task executed successfully.";
         
-        // Text-to-speech output
         if ('speechSynthesis' in window) {
           const utterance = new SpeechSynthesisUtterance(parsed.speechReply);
           utterance.lang = 'en-IN';
@@ -1882,6 +2239,12 @@ You can execute actions by returning JSON ONLY with this schema:
     window.closeModal = function(id) { document.getElementById(id).classList.add('hidden'); };
 
     window.openTransactionModal = function(type = 'EXPENSE') {
+      document.getElementById('txnEditId').value = '';
+      document.getElementById('txnForm').reset();
+      document.getElementById('txnDate').valueAsDate = new Date();
+      document.getElementById('txnModalTitle').innerText = "Log Transaction";
+      document.getElementById('txnModalSubtitle').innerText = "Record a new movement of funds";
+      document.getElementById('txnSubmitBtn').innerText = "Save Transaction";
       setTxnType(type);
       openModal('txnModal');
     };
@@ -1892,38 +2255,59 @@ You can execute actions by returning JSON ONLY with this schema:
         btn.className = "py-1.5 rounded-lg font-semibold text-center text-slate-400 transition";
       });
 
-      const activeBtn = document.getElementById(`typeBtn${type.charAt(0) + type.slice(1).toLowerCase()}`);
+      const btnIdMap = {
+        'EXPENSE': 'typeBtnExpense',
+        'INCOME': 'typeBtnIncome',
+        'TRANSFER': 'typeBtnTransfer',
+        'MULTI_TRANSFER': 'typeBtnMultiTransfer',
+        'LOAN_EMI': 'typeBtnEmi'
+      };
+
+      const activeBtn = document.getElementById(btnIdMap[type]);
       if (activeBtn) activeBtn.className = "py-1.5 rounded-lg font-semibold text-center transition bg-brand-600/30 text-brand-300";
 
       const toAccBox = document.getElementById('toAccountContainer');
+      const multiBox = document.getElementById('multiTransferContainer');
       const emiBox = document.getElementById('emiSplitContainer');
       const catBox = document.getElementById('categoryContainer');
+      const fromLabel = document.getElementById('fromAccountLabel');
+      const amtContainer = document.getElementById('totalAmountContainer');
 
       toAccBox.classList.toggle('hidden', type !== 'TRANSFER');
+      multiBox.classList.toggle('hidden', type !== 'MULTI_TRANSFER');
       emiBox.classList.toggle('hidden', type !== 'LOAN_EMI');
-      catBox.classList.toggle('hidden', type === 'TRANSFER' || type === 'LOAN_EMI');
+      catBox.classList.toggle('hidden', type === 'TRANSFER' || type === 'MULTI_TRANSFER' || type === 'LOAN_EMI');
+
+      if (type === 'MULTI_TRANSFER') {
+        fromLabel.innerText = "Source Salary Account (From)";
+        // Seed first 2 rows if empty
+        if (document.getElementById('multiTransferRows').children.length === 0) {
+          addMultiTransferRow();
+          addMultiTransferRow();
+        }
+      } else {
+        fromLabel.innerText = type === 'INCOME' ? 'Receiving Bank Account' : 'From Bank Account';
+      }
 
       if (type === 'LOAN_EMI') handleEmiSplitCalculation();
     };
 
     window.openEmiPaymentModal = function(loanId) {
-      setTxnType('LOAN_EMI');
+      openTransactionModal('LOAN_EMI');
       document.getElementById('txnLoanId').value = loanId;
       const loan = window.AppState.loans.find(l => l.id === loanId);
       if (loan) document.getElementById('txnAmount').value = loan.emiAmount;
       handleEmiSplitCalculation();
-      openModal('txnModal');
     };
 
     window.openPartPaymentModal = function(loanId) {
-      setTxnType('LOAN_EMI');
+      openTransactionModal('LOAN_EMI');
       document.getElementById('txnLoanId').value = loanId;
       document.getElementById('emiOverrideToggle').checked = true;
       toggleEmiOverride();
       document.getElementById('txnAmount').value = 50000;
       document.getElementById('emiPrincipalAmount').value = 50000;
       document.getElementById('emiInterestAmount').value = 0;
-      openModal('txnModal');
     };
 
     window.openAccountModal = function() { openModal('accountModal'); };
@@ -1960,7 +2344,7 @@ You can execute actions by returning JSON ONLY with this schema:
       document.getElementById('docTaskDetailsContainer').classList.toggle('hidden', !checked);
     };
 
-    // Start App & Real-time Listeners
+    // Initialize App & Real-time Listeners
     initListeners();
     lucide.createIcons();
   </script>
