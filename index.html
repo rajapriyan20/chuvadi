@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Chuvadi - Personal Life OS</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b',
+            },
+            dark: {
+              bg: '#0f172a',
+              card: '#1e293b',
+              border: '#334155',
+              hover: '#273549'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* Mobile-optimized smooth scroll & tap styles */
+    * { -webkit-tap-highlight-color: transparent; }
+    body { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-animation { animation: pulse-ring 2s infinite ease-in-out; }
+  </style>
+</head>
+
+<body class="bg-dark-bg text-slate-100 min-h-screen pb-24 font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header class="sticky top-0 z-30 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border px-4 py-3">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <i data-lucide="compass" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+            Chuvadi
+            <span class="text-[10px] uppercase font-semibold tracking-wider bg-brand-500/20 text-brand-400 px-1.5 py-0.5 rounded">Life OS</span>
+          </h1>
+          <p id="headerDate" class="text-xs text-slate-400">Loading date...</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="openSettingsModal()" class="p-2 rounded-lg bg-dark-card border border-dark-border text-slate-400 hover:text-white transition">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="max-w-4xl mx-auto px-4 py-5 space-y-6">
+
+    <!-- TAB 1: DASHBOARD (COMMAND CENTER) -->
+    <section id="tab-dashboard" class="tab-page space-y-6">
+      
+      <!-- Net Liquid & Financial Snapshot Card -->
+      <div class="bg-gradient-to-br from-dark-card to-slate-900 border border-dark-border rounded-2xl p-5 shadow-xl">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Total Liquid Net Balance</span>
+            <div id="dashTotalLiquid" class="text-3xl font-extrabold text-white tracking-tight mt-0.5">₹0</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Live
+          </span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 pt-3 border-t border-dark-border/60">
+          <div class="bg-dark-bg/60 p-2.5 rounded-xl border border-dark-border/40">
+            <span class="text-[11px] text-slate-400 block">Total Assets</span>
+            <span id="dashTotalAssets" class="text-sm font-bold text-indigo-300">₹0</span>
+          </div>
+          <div class="bg-dark-bg/60 p-2.5 rounded-xl border border-dark-border/40">
+            <span class="text-[11px] text-slate-400 block">Loan Liabilities</span>
+            <span id="dashTotalDebt" class="text-sm font-bold text-rose-400">₹0</span>
+          </div>
+          <div class="bg-dark-bg/60 p-2.5 rounded-xl border border-dark-border/40">
+            <span class="text-[11px] text-slate-400 block">Receivables</span>
+            <span id="dashTotalReceivables" class="text-sm font-bold text-emerald-400">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Urgent Attention Banners -->
+      <div id="urgentAlertsContainer" class="space-y-2 hidden">
+        <h2 class="text-xs uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
+          <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-400"></i> Attention Required
+        </h2>
+        <div id="urgentAlertsList" class="space-y-2"></div>
+      </div>
+
+      <!-- Quick Action Grid -->
+      <div>
+        <h2 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3">Quick Actions</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <button onclick="openTransactionModal('EXPENSE')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-semibold text-white">Log Expense</span>
+          </button>
+
+          <button onclick="openTransactionModal('INCOME')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-semibold text-white">Add Income</span>
+          </button>
+
+          <button onclick="openTransactionModal('TRANSFER')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-semibold text-white">Transfer Funds</span>
+          </button>
+
+          <button onclick="openQuickFuelModal()" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <i data-lucide="fuel" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xs font-semibold text-white">Log Fuel</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Transactions Mini-Feed -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xs uppercase font-bold tracking-wider text-slate-400">Recent Transactions</h2>
+          <button onclick="switchTab('finance')" class="text-xs text-brand-400 hover:underline">View All</button>
+        </div>
+        <div id="dashRecentTxns" class="space-y-2">
+          <div class="text-center py-6 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">
+            No recent transactions logged. Tap "Log Expense" or use Voice to get started.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: FINANCE & LEDGER -->
+    <section id="tab-finance" class="tab-page space-y-6 hidden">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-white">Accounts & Ledger</h2>
+          <p class="text-xs text-slate-400">Manage bank accounts, assets, income & expenses</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="openAccountModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Account
+          </button>
+        </div>
+      </div>
+
+      <!-- Account Buckets by Purpose -->
+      <div class="space-y-3">
+        <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Your Accounts</span>
+        <div id="accountsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Receivables & Payables Ledger -->
+      <div class="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <i data-lucide="users" class="w-4 h-4 text-brand-400"></i>
+            <h3 class="text-sm font-bold text-white">Receivables & Payables</h3>
+          </div>
+          <button onclick="openEntityModal()" class="text-xs text-brand-400 font-semibold hover:underline">+ Add Person</button>
+        </div>
+        <div id="entitiesList" class="space-y-2">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Full Transaction History with Filter -->
+      <div class="space-y-3">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Transaction History</span>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <select id="txnFilterType" onchange="renderTransactionHistory()" class="bg-dark-card border border-dark-border rounded-xl px-2.5 py-1 text-xs text-slate-300 focus:outline-none">
+              <option value="ALL">All Types</option>
+              <option value="EXPENSE">Expenses</option>
+              <option value="INCOME">Income</option>
+              <option value="TRANSFER">Transfers</option>
+              <option value="LOAN_EMI">Loan EMIs</option>
+            </select>
+          </div>
+        </div>
+        <div id="fullTxnList" class="space-y-2">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: LOANS & PREPAYMENT HUB -->
+    <section id="tab-loans" class="tab-page space-y-6 hidden">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-white">Loan Tracker & Simulator</h2>
+          <p class="text-xs text-slate-400">Track home & car loans, EMIs & simulate prepayments</p>
+        </div>
+        <button onclick="openLoanModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Loan
+        </button>
+      </div>
+
+      <!-- Loans List -->
+      <div id="loansList" class="space-y-4">
+        <!-- Loaded dynamically -->
+      </div>
+
+      <!-- Prepayment & Part-Payment Simulator Tool -->
+      <div class="bg-dark-card border border-dark-border rounded-2xl p-5 space-y-4 shadow-xl">
+        <div class="flex items-center gap-2 border-b border-dark-border/60 pb-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <i data-lucide="calculator" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Debt-Free Prepayment Simulator</h3>
+            <p class="text-xs text-slate-400">Calculate months & interest saved with extra payments</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Select Loan</label>
+            <select id="simLoanSelect" onchange="runPrepaymentSim()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2 text-white focus:outline-none focus:border-brand-500">
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">One-Time Part-Payment (₹)</label>
+            <input type="number" id="simLumpSum" value="50000" oninput="runPrepaymentSim()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 50000" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Monthly EMI Step-Up (₹)</label>
+            <input type="number" id="simMonthlyStepUp" value="2000" oninput="runPrepaymentSim()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 2000" />
+          </div>
+        </div>
+
+        <div id="simResultsBox" class="bg-dark-bg/80 border border-brand-500/30 rounded-xl p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div>
+            <span class="text-[11px] text-slate-400 block">Tenure Reduced By</span>
+            <span id="simMonthsSaved" class="text-base font-extrabold text-emerald-400">0 Months</span>
+          </div>
+          <div>
+            <span class="text-[11px] text-slate-400 block">Interest Saved</span>
+            <span id="simInterestSaved" class="text-base font-extrabold text-emerald-400">₹0</span>
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <span class="text-[11px] text-slate-400 block">New Payoff Date</span>
+            <span id="simNewPayoffDate" class="text-sm font-semibold text-brand-300">-</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: THE GARAGE (VEHICLES & TELEMETRY) -->
+    <section id="tab-garage" class="tab-page space-y-6 hidden">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-white">The Garage</h2>
+          <p class="text-xs text-slate-400">Vehicle maintenance, fuel mileage & insurance alerts</p>
+        </div>
+        <button onclick="openVehicleModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Vehicle
+        </button>
+      </div>
+
+      <!-- Vehicle Cards Grid -->
+      <div id="vehiclesList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Loaded dynamically -->
+      </div>
+
+      <!-- Vehicle Fuel & Service Logs -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Garage Service & Fuel Logs</span>
+          <button onclick="openServiceLogModal()" class="text-xs text-brand-400 font-semibold hover:underline">+ Log Repair/Service</button>
+        </div>
+        <div id="vehicleLogsList" class="space-y-2">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: THE VAULT & CLINIC (DOCS & HEALTH) -->
+    <section id="tab-vault" class="tab-page space-y-6 hidden">
+      <!-- Section Header -->
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-white">The Vault & Clinic</h2>
+          <p class="text-xs text-slate-400">Identity documents, action tasks & recurring health doses</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="openDocModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
+            <i data-lucide="file-plus" class="w-3.5 h-3.5"></i> Add Doc
+          </button>
+          <button onclick="openHealthModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
+            <i data-lucide="activity" class="w-3.5 h-3.5"></i> Add Dose
+          </button>
+        </div>
+      </div>
+
+      <!-- Health Cycles (e.g. Albendazole 6-month cycle) -->
+      <div class="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="pill" class="w-4 h-4 text-emerald-400"></i>
+          <h3 class="text-sm font-bold text-white">The Clinic (Recurring Medication Cycles)</h3>
+        </div>
+        <div id="healthCyclesList" class="space-y-2">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Document Vault & Tasks -->
+      <div class="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-indigo-400"></i>
+          <h3 class="text-sm font-bold text-white">The Vault (Documents & To-Do Action Items)</h3>
+        </div>
+        <div id="documentsList" class="space-y-2">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= FLOATING AI VOICE BUTTON ================= -->
+  <div class="fixed bottom-20 inset-x-0 flex justify-center z-40 pointer-events-none">
+    <button onclick="toggleVoiceOverlay()" class="pointer-events-auto w-14 h-14 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-500 text-white shadow-2xl shadow-brand-500/50 flex items-center justify-center hover:scale-105 active:scale-95 transition border-2 border-white/20">
+      <i data-lucide="mic" class="w-6 h-6"></i>
+    </button>
+  </div>
+
+  <!-- ================= BOTTOM NAVIGATION BAR ================= -->
+  <nav class="fixed bottom-0 inset-x-0 bg-dark-bg/95 backdrop-blur-lg border-t border-dark-border z-30 px-2 py-2">
+    <div class="max-w-md mx-auto grid grid-cols-5 items-center justify-around text-center">
+      <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn flex flex-col items-center py-1 text-brand-400 font-semibold transition">
+        <i data-lucide="layout-grid" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]">Dashboard</span>
+      </button>
+
+      <button onclick="switchTab('finance')" id="nav-finance" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
+        <i data-lucide="wallet" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]">Finance</span>
+      </button>
+
+      <!-- Center placeholder for FAB spacing -->
+      <div class="flex flex-col items-center pointer-events-none">
+        <span class="text-[10px] text-slate-500 mt-6 font-medium">Assistant</span>
+      </div>
+
+      <button onclick="switchTab('loans')" id="nav-loans" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
+        <i data-lucide="landmark" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]">Loans</span>
+      </button>
+
+      <button onclick="switchTab('garage')" id="nav-garage" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
+        <i data-lucide="car" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]">Garage</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= VOICE & AI ASSISTANT OVERLAY ================= -->
+  <div id="voiceOverlay" class="fixed inset-0 bg-dark-bg/95 backdrop-blur-xl z-50 flex flex-col justify-between p-6 hidden">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 rounded-full bg-brand-500 animate-ping"></div>
+        <span class="text-xs uppercase font-bold tracking-wider text-brand-400">Gemini Assistant Active</span>
+      </div>
+      <button onclick="toggleVoiceOverlay()" class="p-2 rounded-full bg-dark-card border border-dark-border text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Center Orb / Waves -->
+    <div class="flex flex-col items-center justify-center my-auto space-y-6">
+      <div id="aiMicOrb" class="w-24 h-24 rounded-full bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-2xl shadow-brand-500/50 pulse-animation">
+        <i data-lucide="mic" class="w-10 h-10"></i>
+      </div>
+
+      <div class="text-center max-w-sm">
+        <p id="aiStatusText" class="text-sm font-semibold text-slate-300 mb-1">Listening...</p>
+        <p id="aiSpeechTranscript" class="text-base font-bold text-white min-h-[48px]">"Say: I spent 2000 for petrol in XUV, odometer 12500"</p>
+        <p id="aiReplyText" class="text-xs text-brand-300 mt-2 bg-dark-card/60 p-2.5 rounded-xl border border-dark-border hidden"></p>
+      </div>
+    </div>
+
+    <!-- Manual Text fallback for voice -->
+    <div class="space-y-3 max-w-md mx-auto w-full">
+      <form onsubmit="handleManualAiSubmit(event)" class="flex gap-2">
+        <input type="text" id="aiManualInput" placeholder="Or type command here..." class="flex-1 bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500" />
+        <button type="submit" class="px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </form>
+      <div class="flex justify-center gap-2">
+        <button onclick="startVoiceRecognition()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Restart Speech
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODALS CONTAINER ================= -->
+
+  <!-- 1. Transaction Modal (Expense / Income / Transfer / EMI) -->
+  <div id="txnModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+      <div class="flex justify-between items-center">
+        <h3 id="txnModalTitle" class="text-base font-bold text-white">Log Transaction</h3>
+        <button onclick="closeModal('txnModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="txnForm" onsubmit="saveTransaction(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="txnTypeInput" value="EXPENSE" />
+
+        <!-- Transaction Type Switcher -->
+        <div class="grid grid-cols-4 gap-1 p-1 bg-dark-bg rounded-xl border border-dark-border">
+          <button type="button" onclick="setTxnType('EXPENSE')" id="typeBtnExpense" class="py-1.5 rounded-lg font-semibold text-center transition bg-rose-500/20 text-rose-300">Expense</button>
+          <button type="button" onclick="setTxnType('INCOME')" id="typeBtnIncome" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">Income</button>
+          <button type="button" onclick="setTxnType('TRANSFER')" id="typeBtnTransfer" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">Transfer</button>
+          <button type="button" onclick="setTxnType('LOAN_EMI')" id="typeBtnEmi" class="py-1.5 rounded-lg font-semibold text-center text-slate-400 transition">EMI</button>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Date</label>
+          <input type="date" id="txnDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Total Amount (₹)</label>
+          <input type="number" step="0.01" id="txnAmount" required oninput="handleEmiSplitCalculation()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold text-sm focus:outline-none focus:border-brand-500" placeholder="0.00" />
+        </div>
+
+        <!-- Dynamic Account Fields based on Type -->
+        <div id="fromAccountContainer">
+          <label class="block text-slate-400 mb-1" id="fromAccountLabel">From Bank Account</label>
+          <select id="txnFromAccount" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+            <!-- Loaded dynamically -->
+          </select>
+        </div>
+
+        <div id="toAccountContainer" class="hidden">
+          <label class="block text-slate-400 mb-1">To Bank Account</label>
+          <select id="txnToAccount" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+            <!-- Loaded dynamically -->
+          </select>
+        </div>
+
+        <div id="categoryContainer">
+          <label class="block text-slate-400 mb-1">Category / Tag</label>
+          <input type="text" id="txnCategory" list="categorySuggestions" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Fuel, Groceries, Salary, Maintenance" />
+          <datalist id="categorySuggestions">
+            <option value="Fuel / Petrol"></option>
+            <option value="Vehicle Maintenance"></option>
+            <option value="Groceries & Food"></option>
+            <option value="Salary"></option>
+            <option value="Bank Interest"></option>
+            <option value="Cashback"></option>
+            <option value="Health / Pharmacy"></option>
+            <option value="Utilities / Bills"></option>
+          </datalist>
+        </div>
+
+        <!-- EMI Split Container (Auto-calculated with Override) -->
+        <div id="emiSplitContainer" class="hidden space-y-2 p-3 bg-dark-bg/80 rounded-xl border border-brand-500/30">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-white">EMI Principal / Interest Split</span>
+            <label class="flex items-center gap-1.5 text-[11px] text-slate-300">
+              <input type="checkbox" id="emiOverrideToggle" onchange="toggleEmiOverride()" class="rounded border-dark-border" />
+              Manual Override
+            </label>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Select Loan</label>
+            <select id="txnLoanId" onchange="handleEmiSplitCalculation()" class="w-full bg-dark-card border border-dark-border rounded-xl p-2 text-white">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-400 mb-0.5">Principal Paid (₹)</label>
+              <input type="number" step="0.01" id="emiPrincipalAmount" readonly class="w-full bg-dark-card border border-dark-border rounded-xl p-2 text-emerald-400 font-bold" />
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-0.5">Interest Paid (₹)</label>
+              <input type="number" step="0.01" id="emiInterestAmount" readonly class="w-full bg-dark-card border border-dark-border rounded-xl p-2 text-rose-400 font-bold" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Notes / Description</label>
+          <input type="text" id="txnNotes" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="Optional notes" />
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          Save Transaction
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Account Modal (Create Bank, Investment, Asset) -->
+  <div id="accountModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-white">Add Financial Account</h3>
+        <button onclick="closeModal('accountModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="accountForm" onsubmit="saveAccount(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Account Type</label>
+          <select id="accType" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+            <option value="LIQUID_BANK">Liquid Bank Account / Cash Wallet</option>
+            <option value="INVESTMENT_PF">Retirement & Long-Term (EPF / PPF / MFs)</option>
+            <option value="FIXED_ASSET">Fixed Asset (House Share / Vehicle Equity)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Account / Asset Name</label>
+          <input type="text" id="accName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. HDFC Salary, ICICI Spends, Company EPF, House 50% Share" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Purpose / Tag</label>
+          <input type="text" id="accPurpose" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Salary & EMIs, Daily Spends, Retirement" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Opening / Current Balance (₹)</label>
+          <input type="number" step="0.01" id="accBalance" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="0.00" />
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          Save Account
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Loan Modal -->
+  <div id="loanModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-white">Add Loan Account</h3>
+        <button onclick="closeModal('loanModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="loanForm" onsubmit="saveLoan(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Loan Name</label>
+          <input type="text" id="loanName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Home Loan, XUV 3XO Car Loan" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Lender / Bank</label>
+            <input type="text" id="loanLender" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Union Bank, HDFC" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Loan Type</label>
+            <select id="loanType" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+              <option value="HOME">Home Loan</option>
+              <option value="CAR">Car / Vehicle Loan</option>
+              <option value="PERSONAL">Personal / Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Sanctioned Amount (₹)</label>
+            <input type="number" step="0.01" id="loanSanctioned" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 4500000" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Outstanding Principal (₹)</label>
+            <input type="number" step="0.01" id="loanOutstanding" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="e.g. 3800000" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Annual Interest Rate (%)</label>
+            <input type="number" step="0.01" id="loanInterestRate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 8.45" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Monthly EMI (₹)</label>
+            <input type="number" step="0.01" id="loanEmi" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="e.g. 38500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Start Date</label>
+            <input type="date" id="loanStartDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Tenure (Months)</label>
+            <input type="number" id="loanTenureMonths" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 240" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Linked Bank Account (Auto-Debit Source)</label>
+          <select id="loanLinkedAccount" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          Save Loan Profile
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Vehicle Modal -->
+  <div id="vehicleModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-white">Add Vehicle Profile</h3>
+        <button onclick="closeModal('vehicleModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="vehicleForm" onsubmit="saveVehicle(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Vehicle Nickname / Model</label>
+          <input type="text" id="vehName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Mahindra XUV 3XO, My Bike, Dad's Bike" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Type</label>
+            <select id="vehType" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+              <option value="CAR">Car</option>
+              <option value="BIKE">Two-Wheeler / Bike</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Registration No.</label>
+            <input type="text" id="vehReg" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white uppercase focus:outline-none focus:border-brand-500" placeholder="TN 01 XX 0000" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Insurance Expiry Date</label>
+            <input type="date" id="vehInsuranceDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Current Odometer (km)</label>
+            <input type="number" id="vehOdometer" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 12500" />
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          Save Vehicle
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Fuel & Service Modal -->
+  <div id="serviceLogModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 id="serviceModalTitle" class="text-base font-bold text-white">Log Vehicle Activity</h3>
+        <button onclick="closeModal('serviceLogModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="serviceLogForm" onsubmit="saveVehicleLog(event)" class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Vehicle</label>
+            <select id="logVehId" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Log Type</label>
+            <select id="logType" onchange="toggleLogTypeFields()" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+              <option value="FUEL">Fuel / Petrol Fill-Up</option>
+              <option value="SERVICE">Periodic Service / Oil Change</option>
+              <option value="REPAIR">Repair / Part Replacement</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Date</label>
+            <input type="date" id="logDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Odometer Reading (km)</label>
+            <input type="number" id="logOdometer" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="e.g. 12500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Cost (₹)</label>
+            <input type="number" step="0.01" id="logAmount" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="e.g. 2000" />
+          </div>
+          <div id="fuelLitersContainer">
+            <label class="block text-slate-400 mb-1">Fuel Liters</label>
+            <input type="number" step="0.01" id="logLiters" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 19.5" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Details / Notes</label>
+          <input type="text" id="logDetails" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Full tank at Shell, Mobil 1 Synthetic Oil, Brake pad change" />
+        </div>
+
+        <label class="flex items-center gap-2 text-slate-300">
+          <input type="checkbox" id="logSyncExpense" checked class="rounded border-dark-border" />
+          Also log as an Expense transaction in Finance Ledger
+        </label>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          Save Activity Log
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Health Dose Modal (Recurring Cycles) -->
+  <div id="healthModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-white">Add Medication / Health Cycle</h3>
+        <button onclick="closeModal('healthModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="healthForm" onsubmit="saveHealthCycle(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Medication / Health Item</label>
+          <input type="text" id="healthName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Albendazole (Deworming), Vitamin D3" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Last Taken Date</label>
+            <input type="date" id="healthLastDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Recurrence Cycle (Months)</label>
+            <input type="number" id="healthCycleMonths" value="6" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="e.g. 6" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Dosage / Notes</label>
+          <input type="text" id="healthNotes" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 400mg chewable tablet after dinner" />
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20">
+          Save Health Cycle
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Document & Task Modal -->
+  <div id="docModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-white">Add Document & Linked Task</h3>
+        <button onclick="closeModal('docModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="docForm" onsubmit="saveDocument(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Document Title</label>
+          <input type="text" id="docTitle" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Aadhaar Card, PAN Card, Voter ID, Car RC" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Category</label>
+            <select id="docType" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+              <option value="IDENTITY">Identity (Govt ID)</option>
+              <option value="VEHICLE">Vehicle (RC / Permit)</option>
+              <option value="PROPERTY">Property / Home</option>
+              <option value="FINANCE">Financial / Tax</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Expiry / Renewal Date</label>
+            <input type="date" id="docExpiry" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+        </div>
+
+        <!-- Linked To-Do Task -->
+        <div class="p-3 bg-dark-bg rounded-xl border border-dark-border space-y-2">
+          <label class="flex items-center gap-2 font-bold text-white">
+            <input type="checkbox" id="docHasTask" onchange="toggleDocTaskFields()" class="rounded border-dark-border" />
+            Attach an Action / To-Do Task
+          </label>
+          <div id="docTaskDetailsContainer" class="hidden">
+            <label class="block text-slate-400 mb-1">Task Action Details</label>
+            <input type="text" id="docTaskDetails" class="w-full bg-dark-card border border-dark-border rounded-xl p-2 text-white" placeholder="e.g. Update new address online on portal" />
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          Save Document
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. Entity / Person Modal (Receivables / Payables) -->
+  <div id="entityModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-white">Add Person (Receivable / Payable)</h3>
+        <button onclick="closeModal('entityModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="entityForm" onsubmit="saveEntity(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Person Name</label>
+          <input type="text" id="entityName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Rahul, Suresh" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Direction</label>
+            <select id="entityDirection" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
+              <option value="RECEIVABLE">They Owe Me (Receivable)</option>
+              <option value="PAYABLE">I Owe Them (Payable)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Amount (₹)</label>
+            <input type="number" step="0.01" id="entityAmount" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="0.00" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Reason / Notes</label>
+          <input type="text" id="entityNotes" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Trip bill split, borrowed for bike repair" />
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          Save Entry
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. Settings Modal (Gemini API Key Setup) -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-white">System Settings</h3>
+        <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Gemini API Key (For Voice AI)</label>
+          <p class="text-slate-400 text-[11px] mb-2">Get a free key from <a href="https://aistudio.google.com" target="_blank" class="text-brand-400 underline">Google AI Studio</a>. Saved locally in your browser.</p>
+          <input type="password" id="geminiApiKeyInput" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="AIzaSy..." />
+        </div>
+
+        <div class="p-3 bg-dark-bg rounded-xl border border-dark-border text-slate-400 space-y-1">
+          <p class="font-semibold text-slate-300">Firebase Firestore Status:</p>
+          <p class="text-emerald-400 flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Connected to Project: chuvadi-d5fc1</p>
+        </div>
+
+        <button onclick="saveSettings()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FIREBASE & APP LOGIC MODULE ================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      doc, 
+      addDoc, 
+      setDoc, 
+      updateDoc, 
+      deleteDoc, 
+      onSnapshot, 
+      query, 
+      orderBy,
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB75TCDYTXViVv8b8JUy0ioZO_-e-CONFA",
+      authDomain: "chuvadi-d5fc1.firebaseapp.com",
+      projectId: "chuvadi-d5fc1",
+      storageBucket: "chuvadi-d5fc1.firebasestorage.app",
+      messagingSenderId: "673744947945",
+      appId: "1:673744947945:web:f38fb01b77bf34c55a7e78",
+      measurementId: "G-3PND0HNY0N"
+    };
+
+    // Initialize Firebase & DB
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Global In-Memory Reactive Cache
+    window.AppState = {
+      accounts: [],
+      loans: [],
+      transactions: [],
+      entities: [],
+      vehicles: [],
+      vehicleLogs: [],
+      healthCycles: [],
+      documents: [],
+      geminiKey: localStorage.getItem('chuvadi_gemini_key') || ''
+    };
+
+    // Date formatting helper
+    function formatDate(d) {
+      if (!d) return '';
+      const date = new Date(d);
+      return isNaN(date) ? d : date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    function formatCurrency(val) {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val || 0);
+    }
+
+    // Initialize Header Date
+    document.getElementById('headerDate').innerText = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('txnDate').valueAsDate = new Date();
+    document.getElementById('logDate').valueAsDate = new Date();
+    document.getElementById('healthLastDate').valueAsDate = new Date();
+
+    // ----------------------------------------------------
+    // REAL-TIME FIRESTORE SUBSCRIPTIONS
+    // ----------------------------------------------------
+    function initListeners() {
+      // 1. Accounts
+      onSnapshot(collection(db, "accounts"), (snap) => {
+        window.AppState.accounts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAccounts();
+        updateDashboardMetrics();
+        populateAccountSelects();
+      });
+
+      // 2. Loans
+      onSnapshot(collection(db, "loans"), (snap) => {
+        window.AppState.loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderLoans();
+        updateDashboardMetrics();
+        populateLoanSelects();
+        runPrepaymentSim();
+      });
+
+      // 3. Transactions
+      onSnapshot(query(collection(db, "transactions"), orderBy("date", "desc")), (snap) => {
+        window.AppState.transactions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderTransactionHistory();
+        renderRecentTransactions();
+        updateDashboardMetrics();
+      });
+
+      // 4. Receivables & Payables
+      onSnapshot(collection(db, "receivables_payables"), (snap) => {
+        window.AppState.entities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderEntities();
+        updateDashboardMetrics();
+      });
+
+      // 5. Vehicles
+      onSnapshot(collection(db, "vehicles"), (snap) => {
+        window.AppState.vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderVehicles();
+        populateVehicleSelects();
+        checkUrgentAlerts();
+      });
+
+      // 6. Vehicle Logs
+      onSnapshot(query(collection(db, "vehicle_logs"), orderBy("date", "desc")), (snap) => {
+        window.AppState.vehicleLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderVehicleLogs();
+      });
+
+      // 7. Health Cycles
+      onSnapshot(collection(db, "health_logs"), (snap) => {
+        window.AppState.healthCycles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderHealthCycles();
+        checkUrgentAlerts();
+      });
+
+      // 8. Documents & Tasks
+      onSnapshot(collection(db, "documents"), (snap) => {
+        window.AppState.documents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderDocuments();
+        checkUrgentAlerts();
+      });
+    }
+
+    // ----------------------------------------------------
+    // RENDERING & UI UPDATES
+    // ----------------------------------------------------
+    function updateDashboardMetrics() {
+      let liquid = 0, assets = 0, debt = 0, receivables = 0;
+
+      window.AppState.accounts.forEach(acc => {
+        const bal = Number(acc.balance) || 0;
+        if (acc.type === 'LIQUID_BANK') liquid += bal;
+        else if (acc.type === 'INVESTMENT_PF' || acc.type === 'FIXED_ASSET') assets += bal;
+      });
+
+      window.AppState.loans.forEach(loan => {
+        debt += Number(loan.outstandingPrincipal) || 0;
+      });
+
+      window.AppState.entities.forEach(ent => {
+        const amt = Number(ent.amount) || 0;
+        if (ent.type === 'RECEIVABLE') receivables += amt;
+      });
+
+      document.getElementById('dashTotalLiquid').innerText = formatCurrency(liquid);
+      document.getElementById('dashTotalAssets').innerText = formatCurrency(assets + liquid);
+      document.getElementById('dashTotalDebt').innerText = formatCurrency(debt);
+      document.getElementById('dashTotalReceivables').innerText = formatCurrency(receivables);
+    }
+
+    function checkUrgentAlerts() {
+      const container = document.getElementById('urgentAlertsContainer');
+      const list = document.getElementById('urgentAlertsList');
+      list.innerHTML = '';
+      const alerts = [];
+      const today = new Date();
+
+      // Vehicle Insurance Alerts (within 30 days or overdue)
+      window.AppState.vehicles.forEach(v => {
+        if (v.insuranceExpiry) {
+          const exp = new Date(v.insuranceExpiry);
+          const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+          if (diffDays <= 30) {
+            alerts.push({
+              icon: 'shield-alert',
+              color: diffDays <= 7 ? 'border-rose-500 bg-rose-500/10 text-rose-300' : 'border-amber-500 bg-amber-500/10 text-amber-300',
+              title: `${v.name} Insurance Expiry`,
+              desc: diffDays < 0 ? `Expired ${Math.abs(diffDays)} days ago!` : `Due in ${diffDays} days (${formatDate(v.insuranceExpiry)})`
+            });
+          }
+        }
+      });
+
+      // Health Recurring Cycles (e.g. Albendazole due)
+      window.AppState.healthCycles.forEach(h => {
+        if (h.nextDueDate) {
+          const due = new Date(h.nextDueDate);
+          const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+          if (diffDays <= 14) {
+            alerts.push({
+              icon: 'pill',
+              color: 'border-emerald-500 bg-emerald-500/10 text-emerald-300',
+              title: `${h.name} Dose Due`,
+              desc: diffDays <= 0 ? `Due now! (Last taken: ${formatDate(h.lastTakenDate)})` : `Due in ${diffDays} days (${formatDate(h.nextDueDate)})`
+            });
+          }
+        }
+      });
+
+      // Document Action Items / Tasks
+      window.AppState.documents.forEach(d => {
+        if (d.hasTask && !d.taskCompleted) {
+          alerts.push({
+            icon: 'check-square',
+            color: 'border-brand-500 bg-brand-500/10 text-brand-300',
+            title: `Task: ${d.title}`,
+            desc: d.taskDetails || 'Pending update required'
+          });
+        }
+      });
+
+      if (alerts.length > 0) {
+        container.classList.remove('hidden');
+        alerts.forEach(a => {
+          const el = document.createElement('div');
+          el.className = `p-3 rounded-xl border flex items-center justify-between text-xs ${a.color}`;
+          el.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="${a.icon}" class="w-4 h-4 shrink-0"></i>
+              <div>
+                <strong class="block text-white">${a.title}</strong>
+                <span class="opacity-90">${a.desc}</span>
+              </div>
+            </div>
+          `;
+          list.appendChild(el);
+        });
+        lucide.createIcons();
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function renderAccounts() {
+      const container = document.getElementById('accountsList');
+      if (window.AppState.accounts.length === 0) {
+        container.innerHTML = `<div class="col-span-2 text-center py-6 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No bank accounts added yet. Tap "+ Add Account".</div>`;
+        return;
+      }
+      container.innerHTML = window.AppState.accounts.map(acc => `
+        <div class="bg-dark-card border border-dark-border p-4 rounded-2xl flex justify-between items-start">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">${acc.name}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${acc.type === 'LIQUID_BANK' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : acc.type === 'INVESTMENT_PF' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                ${acc.type === 'LIQUID_BANK' ? 'Liquid' : acc.type === 'INVESTMENT_PF' ? 'Investment' : 'Fixed Asset'}
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5">${acc.purpose || 'General'}</p>
+          </div>
+          <div class="text-right">
+            <span class="text-sm font-extrabold text-white block">${formatCurrency(acc.balance)}</span>
+            <button onclick="deleteDocItem('accounts', '${acc.id}')" class="text-[10px] text-slate-500 hover:text-rose-400 mt-1">Delete</button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderLoans() {
+      const container = document.getElementById('loansList');
+      if (window.AppState.loans.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No active loans configured. Tap "+ Add Loan" to set up your Home or Car loan tracking.</div>`;
+        return;
+      }
+
+      container.innerHTML = window.AppState.loans.map(l => {
+        const sanctioned = Number(l.originalAmount) || 1;
+        const outstanding = Number(l.outstandingPrincipal) || 0;
+        const repaid = Math.max(0, sanctioned - outstanding);
+        const percent = Math.min(100, Math.round((repaid / sanctioned) * 100));
+
+        return `
+          <div class="bg-dark-card border border-dark-border rounded-2xl p-5 space-y-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <i data-lucide="${l.loanType === 'HOME' ? 'home' : 'car'}" class="w-4 h-4 text-brand-400"></i>
+                  ${l.name}
+                </span>
+                <p class="text-[11px] text-slate-400">${l.lender} • ${l.interestRate}% p.a. • EMI: ${formatCurrency(l.emiAmount)}/mo</p>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-slate-400 block">Remaining Principal</span>
+                <span class="text-base font-extrabold text-rose-400">${formatCurrency(outstanding)}</span>
+              </div>
+            </div>
+
+            <!-- Payoff Progress Bar -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-[11px] text-slate-400">
+                <span>Repaid: ${formatCurrency(repaid)} (${percent}%)</span>
+                <span>Sanctioned: ${formatCurrency(sanctioned)}</span>
+              </div>
+              <div class="w-full bg-dark-bg h-2 rounded-full overflow-hidden border border-dark-border">
+                <div class="bg-gradient-to-r from-brand-600 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-2 border-t border-dark-border/50">
+              <button onclick="openEmiPaymentModal('${l.id}')" class="flex-1 py-2 bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i> Log EMI
+              </button>
+              <button onclick="openPartPaymentModal('${l.id}')" class="flex-1 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold flex items-center justify-center gap-1">
+                <i data-lucide="zap" class="w-3.5 h-3.5"></i> Part-Payment
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function renderEntities() {
+      const container = document.getElementById('entitiesList');
+      if (window.AppState.entities.length === 0) {
+        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">No receivables or payables tracked.</div>`;
+        return;
+      }
+      container.innerHTML = window.AppState.entities.map(e => `
+        <div class="flex justify-between items-center p-2.5 bg-dark-bg rounded-xl border border-dark-border/60 text-xs">
+          <div>
+            <span class="font-bold text-white block">${e.name}</span>
+            <span class="text-[11px] text-slate-400">${e.notes || ''}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="font-bold ${e.type === 'RECEIVABLE' ? 'text-emerald-400' : 'text-rose-400'}">
+              ${e.type === 'RECEIVABLE' ? '+ ' : '- '}${formatCurrency(e.amount)}
+            </span>
+            <button onclick="deleteDocItem('receivables_payables', '${e.id}')" class="text-slate-500 hover:text-rose-400"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderRecentTransactions() {
+      const container = document.getElementById('dashRecentTxns');
+      const recents = window.AppState.transactions.slice(0, 4);
+      if (recents.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No recent transactions logged.</div>`;
+        return;
+      }
+      container.innerHTML = recents.map(t => renderTxnItem(t)).join('');
+      lucide.createIcons();
+    }
+
+    function renderTransactionHistory() {
+      const filter = document.getElementById('txnFilterType').value;
+      const container = document.getElementById('fullTxnList');
+      let txns = window.AppState.transactions;
+      if (filter !== 'ALL') {
+        txns = txns.filter(t => t.type === filter);
+      }
+      if (txns.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No transactions match filter.</div>`;
+        return;
+      }
+      container.innerHTML = txns.map(t => renderTxnItem(t)).join('');
+      lucide.createIcons();
+    }
+
+    function renderTxnItem(t) {
+      const isExpense = t.type === 'EXPENSE' || t.type === 'LOAN_EMI';
+      const isIncome = t.type === 'INCOME';
+      const color = isIncome ? 'text-emerald-400' : isExpense ? 'text-rose-400' : 'text-blue-400';
+      const prefix = isIncome ? '+' : isExpense ? '-' : '⇄';
+
+      return `
+        <div class="flex justify-between items-center p-3 bg-dark-card border border-dark-border rounded-xl text-xs">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg ${isIncome ? 'bg-emerald-500/10 text-emerald-400' : isExpense ? 'bg-rose-500/10 text-rose-400' : 'bg-blue-500/10 text-blue-400'} flex items-center justify-center">
+              <i data-lucide="${isIncome ? 'arrow-down-left' : isExpense ? 'arrow-up-right' : 'arrow-left-right'}" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="font-bold text-white block">${t.category || t.type}</span>
+              <span class="text-[11px] text-slate-400">${formatDate(t.date)} ${t.notes ? '• ' + t.notes : ''}</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="font-bold ${color} block text-sm">${prefix} ${formatCurrency(t.amount)}</span>
+            <button onclick="deleteDocItem('transactions', '${t.id}')" class="text-[10px] text-slate-500 hover:text-rose-400">Delete</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVehicles() {
+      const container = document.getElementById('vehiclesList');
+      if (window.AppState.vehicles.length === 0) {
+        container.innerHTML = `<div class="col-span-2 text-center py-6 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No vehicles added. Tap "+ Add Vehicle" to manage your XUV 3XO and bikes.</div>`;
+        return;
+      }
+      container.innerHTML = window.AppState.vehicles.map(v => `
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <i data-lucide="${v.type === 'CAR' ? 'car' : 'bike'}" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-white">${v.name}</h4>
+                <p class="text-[11px] text-slate-400">${v.regNo || 'No Reg Number'}</p>
+              </div>
+            </div>
+            <button onclick="deleteDocItem('vehicles', '${v.id}')" class="text-slate-500 hover:text-rose-400"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs bg-dark-bg p-2.5 rounded-xl border border-dark-border/50">
+            <div>
+              <span class="text-[10px] text-slate-400 block">Insurance Due</span>
+              <span class="font-semibold text-amber-300">${formatDate(v.insuranceExpiry) || 'Not set'}</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 block">Odometer</span>
+              <span class="font-semibold text-white">${v.currentOdometer ? v.currentOdometer + ' km' : '-'}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderVehicleLogs() {
+      const container = document.getElementById('vehicleLogsList');
+      if (window.AppState.vehicleLogs.length === 0) {
+        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">No service or fuel logs yet.</div>`;
+        return;
+      }
+      container.innerHTML = window.AppState.vehicleLogs.map(l => {
+        const veh = window.AppState.vehicles.find(v => v.id === l.vehicleId);
+        return `
+          <div class="flex justify-between items-center p-3 bg-dark-card border border-dark-border rounded-xl text-xs">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="${l.type === 'FUEL' ? 'fuel' : 'wrench'}" class="w-4 h-4 ${l.type === 'FUEL' ? 'text-amber-400' : 'text-blue-400'}"></i>
+              <div>
+                <span class="font-bold text-white block">${veh ? veh.name : 'Vehicle'} • ${l.details || l.type}</span>
+                <span class="text-[11px] text-slate-400">${formatDate(l.date)} • ${l.odometer ? l.odometer + ' km' : ''} ${l.liters ? '• ' + l.liters + ' L' : ''}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-white block">${formatCurrency(l.amount)}</span>
+              <button onclick="deleteDocItem('vehicle_logs', '${l.id}')" class="text-[10px] text-slate-500 hover:text-rose-400">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function renderHealthCycles() {
+      const container = document.getElementById('healthCyclesList');
+      if (window.AppState.healthCycles.length === 0) {
+        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">No recurring health doses added. Tap "+ Add Dose" to track items like Albendazole.</div>`;
+        return;
+      }
+      container.innerHTML = window.AppState.healthCycles.map(h => `
+        <div class="flex justify-between items-center p-3 bg-dark-bg rounded-xl border border-dark-border text-xs">
+          <div>
+            <span class="font-bold text-white block">${h.name}</span>
+            <span class="text-[11px] text-slate-400">Cycle: Every ${h.cycleMonths} Months • Last: ${formatDate(h.lastTakenDate)}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 block">Next Due</span>
+              <span class="font-bold text-emerald-400">${formatDate(h.nextDueDate)}</span>
+            </div>
+            <button onclick="markDoseTaken('${h.id}')" class="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-lg text-[11px] font-semibold">
+              Take Now
+            </button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderDocuments() {
+      const container = document.getElementById('documentsList');
+      if (window.AppState.documents.length === 0) {
+        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">No documents stored. Tap "+ Add Doc" to track PAN, Voter ID, Aadhaar tasks, etc.</div>`;
+        return;
+      }
+      container.innerHTML = window.AppState.documents.map(d => `
+        <div class="p-3 bg-dark-bg rounded-xl border border-dark-border text-xs space-y-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="font-bold text-white flex items-center gap-1.5">
+                <i data-lucide="file-check" class="w-3.5 h-3.5 text-indigo-400"></i>
+                ${d.title}
+              </span>
+              <span class="text-[11px] text-slate-400">${d.type} ${d.expiryDate ? '• Expiry: ' + formatDate(d.expiryDate) : ''}</span>
+            </div>
+            <button onclick="deleteDocItem('documents', '${d.id}')" class="text-slate-500 hover:text-rose-400"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
+          </div>
+          ${d.hasTask ? `
+            <div class="flex items-center justify-between pt-2 border-t border-dark-border/40 text-[11px]">
+              <label class="flex items-center gap-2 text-slate-300">
+                <input type="checkbox" ${d.taskCompleted ? 'checked' : ''} onchange="toggleTaskStatus('${d.id}', this.checked)" class="rounded border-dark-border" />
+                <span class="${d.taskCompleted ? 'line-through text-slate-500' : 'text-brand-300 font-medium'}">${d.taskDetails || 'Task'}</span>
+              </label>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function populateAccountSelects() {
+      const fromSel = document.getElementById('txnFromAccount');
+      const toSel = document.getElementById('txnToAccount');
+      const loanAccSel = document.getElementById('loanLinkedAccount');
+
+      const options = window.AppState.accounts.map(a => `<option value="${a.id}">${a.name} (${formatCurrency(a.balance)})</option>`).join('');
+      if (fromSel) fromSel.innerHTML = options;
+      if (toSel) toSel.innerHTML = options;
+      if (loanAccSel) loanAccSel.innerHTML = options;
+    }
+
+    function populateLoanSelects() {
+      const loanSel = document.getElementById('txnLoanId');
+      const simSel = document.getElementById('simLoanSelect');
+      const options = window.AppState.loans.map(l => `<option value="${l.id}">${l.name} (${formatCurrency(l.outstandingPrincipal)})</option>`).join('');
+      if (loanSel) loanSel.innerHTML = options;
+      if (simSel) simSel.innerHTML = options;
+    }
+
+    function populateVehicleSelects() {
+      const sel = document.getElementById('logVehId');
+      if (sel) {
+        sel.innerHTML = window.AppState.vehicles.map(v => `<option value="${v.id}">${v.name} (${v.regNo || 'No Reg'})</option>`).join('');
+      }
+    }
+
+    // ----------------------------------------------------
+    // PREPAYMENT SIMULATOR MATH
+    // ----------------------------------------------------
+    window.runPrepaymentSim = function() {
+      const loanId = document.getElementById('simLoanSelect').value;
+      const lumpSum = parseFloat(document.getElementById('simLumpSum').value) || 0;
+      const stepUp = parseFloat(document.getElementById('simMonthlyStepUp').value) || 0;
+
+      const loan = window.AppState.loans.find(l => l.id === loanId);
+      if (!loan) return;
+
+      const P = Math.max(0, (Number(loan.outstandingPrincipal) || 0) - lumpSum);
+      const r = (Number(loan.interestRate) || 8.5) / (12 * 100);
+      const E = (Number(loan.emiAmount) || 0) + stepUp;
+
+      if (P <= 0 || E <= P * r) {
+        document.getElementById('simMonthsSaved').innerText = "Instant Payoff!";
+        document.getElementById('simInterestSaved').innerText = formatCurrency(loan.outstandingPrincipal * 0.4);
+        return;
+      }
+
+      // Remaining months formula: n = -ln(1 - P*r/E) / ln(1 + r)
+      const nNew = Math.ceil(-Math.log(1 - (P * r) / E) / Math.log(1 + r));
+      const nOld = Math.ceil(-Math.log(1 - (loan.outstandingPrincipal * r) / loan.emiAmount) / Math.log(1 + r)) || 240;
+
+      const monthsSaved = Math.max(0, nOld - nNew);
+      const totalOldPayment = nOld * loan.emiAmount;
+      const totalNewPayment = (nNew * E) + lumpSum;
+      const interestSaved = Math.max(0, totalOldPayment - totalNewPayment);
+
+      const targetDate = new Date();
+      targetDate.setMonth(targetDate.getMonth() + nNew);
+
+      document.getElementById('simMonthsSaved').innerText = `${monthsSaved} Months (${(monthsSaved / 12).toFixed(1)} Yrs)`;
+      document.getElementById('simInterestSaved').innerText = formatCurrency(interestSaved);
+      document.getElementById('simNewPayoffDate').innerText = targetDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+    };
+
+    // ----------------------------------------------------
+    // EMI AUTO-SPLIT ENGINE
+    // ----------------------------------------------------
+    window.handleEmiSplitCalculation = function() {
+      const type = document.getElementById('txnTypeInput').value;
+      if (type !== 'LOAN_EMI') return;
+
+      const override = document.getElementById('emiOverrideToggle').checked;
+      if (override) return; // User is manually overriding
+
+      const loanId = document.getElementById('txnLoanId').value;
+      const loan = window.AppState.loans.find(l => l.id === loanId);
+      const totalPaid = parseFloat(document.getElementById('txnAmount').value) || 0;
+
+      if (!loan || totalPaid <= 0) return;
+
+      const monthlyInterest = (Number(loan.outstandingPrincipal) * Number(loan.interestRate)) / (12 * 100);
+      const principalPaid = Math.max(0, totalPaid - monthlyInterest);
+
+      document.getElementById('emiPrincipalAmount').value = principalPaid.toFixed(2);
+      document.getElementById('emiInterestAmount').value = monthlyInterest.toFixed(2);
+    };
+
+    window.toggleEmiOverride = function() {
+      const override = document.getElementById('emiOverrideToggle').checked;
+      document.getElementById('emiPrincipalAmount').readOnly = !override;
+      document.getElementById('emiInterestAmount').readOnly = !override;
+    };
+
+    // ----------------------------------------------------
+    // FIRESTORE ACTIONS & FORM HANDLERS
+    // ----------------------------------------------------
+    window.saveAccount = async function(e) {
+      e.preventDefault();
+      await addDoc(collection(db, "accounts"), {
+        name: document.getElementById('accName').value,
+        type: document.getElementById('accType').value,
+        purpose: document.getElementById('accPurpose').value,
+        balance: parseFloat(document.getElementById('accBalance').value) || 0,
+        createdAt: serverTimestamp()
+      });
+      closeModal('accountModal');
+      document.getElementById('accountForm').reset();
+    };
+
+    window.saveLoan = async function(e) {
+      e.preventDefault();
+      await addDoc(collection(db, "loans"), {
+        name: document.getElementById('loanName').value,
+        lender: document.getElementById('loanLender').value,
+        loanType: document.getElementById('loanType').value,
+        originalAmount: parseFloat(document.getElementById('loanSanctioned').value) || 0,
+        outstandingPrincipal: parseFloat(document.getElementById('loanOutstanding').value) || 0,
+        interestRate: parseFloat(document.getElementById('loanInterestRate').value) || 0,
+        emiAmount: parseFloat(document.getElementById('loanEmi').value) || 0,
+        startDate: document.getElementById('loanStartDate').value,
+        tenureMonths: parseInt(document.getElementById('loanTenureMonths').value) || 240,
+        linkedBankAccountId: document.getElementById('loanLinkedAccount').value,
+        createdAt: serverTimestamp()
+      });
+      closeModal('loanModal');
+      document.getElementById('loanForm').reset();
+    };
+
+    window.saveTransaction = async function(e) {
+      e.preventDefault();
+      const type = document.getElementById('txnTypeInput').value;
+      const amount = parseFloat(document.getElementById('txnAmount').value) || 0;
+      const fromAccId = document.getElementById('txnFromAccount').value;
+      const toAccId = document.getElementById('txnToAccount').value;
+
+      const txnData = {
+        type: type,
+        date: document.getElementById('txnDate').value,
+        amount: amount,
+        fromAccountId: fromAccId,
+        toAccountId: type === 'TRANSFER' ? toAccId : null,
+        category: document.getElementById('txnCategory').value || type,
+        notes: document.getElementById('txnNotes').value,
+        createdAt: serverTimestamp()
+      };
+
+      if (type === 'LOAN_EMI') {
+        const loanId = document.getElementById('txnLoanId').value;
+        const principal = parseFloat(document.getElementById('emiPrincipalAmount').value) || 0;
+        const interest = parseFloat(document.getElementById('emiInterestAmount').value) || 0;
+        txnData.loanId = loanId;
+        txnData.split = { principal, interest, overridden: document.getElementById('emiOverrideToggle').checked };
+
+        // Deduct principal from loan account
+        const loan = window.AppState.loans.find(l => l.id === loanId);
+        if (loan) {
+          const newPrincipal = Math.max(0, loan.outstandingPrincipal - principal);
+          await updateDoc(doc(db, "loans", loanId), { outstandingPrincipal: newPrincipal });
+        }
+      }
+
+      // Update bank account balances
+      if (fromAccId && (type === 'EXPENSE' || type === 'TRANSFER' || type === 'LOAN_EMI')) {
+        const fromAcc = window.AppState.accounts.find(a => a.id === fromAccId);
+        if (fromAcc) {
+          await updateDoc(doc(db, "accounts", fromAccId), { balance: fromAcc.balance - amount });
+        }
+      }
+      if (toAccId && type === 'TRANSFER') {
+        const toAcc = window.AppState.accounts.find(a => a.id === toAccId);
+        if (toAcc) {
+          await updateDoc(doc(db, "accounts", toAccId), { balance: toAcc.balance + amount });
+        }
+      }
+      if (fromAccId && type === 'INCOME') {
+        const targetAcc = window.AppState.accounts.find(a => a.id === fromAccId);
+        if (targetAcc) {
+          await updateDoc(doc(db, "accounts", fromAccId), { balance: targetAcc.balance + amount });
+        }
+      }
+
+      await addDoc(collection(db, "transactions"), txnData);
+      closeModal('txnModal');
+      document.getElementById('txnForm').reset();
+    };
+
+    window.saveVehicle = async function(e) {
+      e.preventDefault();
+      await addDoc(collection(db, "vehicles"), {
+        name: document.getElementById('vehName').value,
+        type: document.getElementById('vehType').value,
+        regNo: document.getElementById('vehReg').value.toUpperCase(),
+        insuranceExpiry: document.getElementById('vehInsuranceDate').value,
+        currentOdometer: parseInt(document.getElementById('vehOdometer').value) || 0,
+        createdAt: serverTimestamp()
+      });
+      closeModal('vehicleModal');
+      document.getElementById('vehicleForm').reset();
+    };
+
+    window.saveVehicleLog = async function(e) {
+      e.preventDefault();
+      const vehId = document.getElementById('logVehId').value;
+      const type = document.getElementById('logType').value;
+      const amount = parseFloat(document.getElementById('logAmount').value) || 0;
+      const odo = parseInt(document.getElementById('logOdometer').value) || 0;
+
+      await addDoc(collection(db, "vehicle_logs"), {
+        vehicleId: vehId,
+        type: type,
+        date: document.getElementById('logDate').value,
+        odometer: odo,
+        amount: amount,
+        liters: parseFloat(document.getElementById('logLiters').value) || null,
+        details: document.getElementById('logDetails').value,
+        createdAt: serverTimestamp()
+      });
+
+      // Update vehicle current odometer
+      if (vehId && odo > 0) {
+        await updateDoc(doc(db, "vehicles", vehId), { currentOdometer: odo });
+      }
+
+      // If sync to expense is checked
+      if (document.getElementById('logSyncExpense').checked && window.AppState.accounts.length > 0) {
+        await addDoc(collection(db, "transactions"), {
+          type: 'EXPENSE',
+          date: document.getElementById('logDate').value,
+          amount: amount,
+          fromAccountId: window.AppState.accounts[0].id,
+          category: type === 'FUEL' ? 'Fuel / Petrol' : 'Vehicle Maintenance',
+          notes: document.getElementById('logDetails').value,
+          createdAt: serverTimestamp()
+        });
+      }
+
+      closeModal('serviceLogModal');
+      document.getElementById('serviceLogForm').reset();
+    };
+
+    window.saveHealthCycle = async function(e) {
+      e.preventDefault();
+      const lastDate = new Date(document.getElementById('healthLastDate').value);
+      const months = parseInt(document.getElementById('healthCycleMonths').value) || 6;
+      const nextDate = new Date(lastDate);
+      nextDate.setMonth(nextDate.getMonth() + months);
+
+      await addDoc(collection(db, "health_logs"), {
+        name: document.getElementById('healthName').value,
+        cycleMonths: months,
+        lastTakenDate: document.getElementById('healthLastDate').value,
+        nextDueDate: nextDate.toISOString().split('T')[0],
+        notes: document.getElementById('healthNotes').value,
+        createdAt: serverTimestamp()
+      });
+      closeModal('healthModal');
+      document.getElementById('healthForm').reset();
+    };
+
+    window.markDoseTaken = async function(id) {
+      const h = window.AppState.healthCycles.find(item => item.id === id);
+      if (!h) return;
+      const today = new Date();
+      const nextDate = new Date(today);
+      nextDate.setMonth(nextDate.getMonth() + (h.cycleMonths || 6));
+
+      await updateDoc(doc(db, "health_logs", id), {
+        lastTakenDate: today.toISOString().split('T')[0],
+        nextDueDate: nextDate.toISOString().split('T')[0]
+      });
+    };
+
+    window.saveDocument = async function(e) {
+      e.preventDefault();
+      await addDoc(collection(db, "documents"), {
+        title: document.getElementById('docTitle').value,
+        type: document.getElementById('docType').value,
+        expiryDate: document.getElementById('docExpiry').value || null,
+        hasTask: document.getElementById('docHasTask').checked,
+        taskDetails: document.getElementById('docTaskDetails').value,
+        taskCompleted: false,
+        createdAt: serverTimestamp()
+      });
+      closeModal('docModal');
+      document.getElementById('docForm').reset();
+    };
+
+    window.toggleTaskStatus = async function(id, completed) {
+      await updateDoc(doc(db, "documents", id), { taskCompleted: completed });
+    };
+
+    window.saveEntity = async function(e) {
+      e.preventDefault();
+      await addDoc(collection(db, "receivables_payables"), {
+        name: document.getElementById('entityName').value,
+        type: document.getElementById('entityDirection').value,
+        amount: parseFloat(document.getElementById('entityAmount').value) || 0,
+        notes: document.getElementById('entityNotes').value,
+        createdAt: serverTimestamp()
+      });
+      closeModal('entityModal');
+      document.getElementById('entityForm').reset();
+    };
+
+    window.deleteDocItem = async function(col, id) {
+      if (confirm('Delete this item permanently?')) {
+        await deleteDoc(doc(db, col, id));
+      }
+    };
+
+    // ----------------------------------------------------
+    // GEMINI AI VOICE ASSISTANT & TOOL EXECUTOR
+    // ----------------------------------------------------
+    let recognition;
+    window.toggleVoiceOverlay = function() {
+      const el = document.getElementById('voiceOverlay');
+      if (el.classList.contains('hidden')) {
+        el.classList.remove('hidden');
+        startVoiceRecognition();
+      } else {
+        el.classList.add('hidden');
+        if (recognition) recognition.stop();
+      }
+    };
+
+    window.startVoiceRecognition = function() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        document.getElementById('aiStatusText').innerText = "Speech API not supported in browser. Use typing.";
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-IN';
+
+      recognition.onstart = () => {
+        document.getElementById('aiStatusText').innerText = "Listening to your command...";
+      };
+      recognition.onresult = (e) => {
+        const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+        document.getElementById('aiSpeechTranscript').innerText = `"${transcript}"`;
+      };
+      recognition.onend = () => {
+        const text = document.getElementById('aiSpeechTranscript').innerText.replace(/"/g, '');
+        if (text && text.trim().length > 3 && !text.includes('Say:')) {
+          executeAiCommand(text);
+        }
+      };
+      recognition.start();
+    };
+
+    window.handleManualAiSubmit = function(e) {
+      e.preventDefault();
+      const val = document.getElementById('aiManualInput').value;
+      if (val) executeAiCommand(val);
+    };
+
+    async function executeAiCommand(userPrompt) {
+      const replyBox = document.getElementById('aiReplyText');
+      replyBox.classList.remove('hidden');
+      replyBox.innerText = "Analyzing with Gemini...";
+
+      const apiKey = window.AppState.geminiKey;
+      if (!apiKey) {
+        replyBox.innerText = "Please enter your Gemini API Key in Settings (top right gear icon) first.";
+        return;
+      }
+
+      try {
+        const systemPrompt = `You are Chuvadi, a personal life OS assistant.
+Current Date: ${new Date().toISOString().split('T')[0]}.
+Current Data Context:
+- Bank Accounts: ${JSON.stringify(window.AppState.accounts.map(a => ({ name: a.name, balance: a.balance })))}
+- Loans: ${JSON.stringify(window.AppState.loans.map(l => ({ name: l.name, principal: l.outstandingPrincipal, emi: l.emiAmount })))}
+- Vehicles: ${JSON.stringify(window.AppState.vehicles.map(v => ({ name: v.name, insuranceDue: v.insuranceExpiry, odo: v.currentOdometer })))}
+- Health Cycles: ${JSON.stringify(window.AppState.healthCycles.map(h => ({ name: h.name, nextDue: h.nextDueDate })))}
+
+You can execute actions by returning JSON ONLY with this schema:
+{
+  "action": "LOG_EXPENSE" | "LOG_FUEL" | "ANSWER_QUERY",
+  "data": {
+    "amount": number,
+    "category": string,
+    "vehicleName": string,
+    "odometer": number,
+    "liters": number
+  },
+  "speechReply": "Conversational reply to user"
+}`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `${systemPrompt}\n\nUser command: "${userPrompt}"` }] }],
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        });
+
+        const result = await response.json();
+        const parsed = JSON.parse(result.candidates[0].content.parts[0].text);
+
+        // Execute function call actions
+        if (parsed.action === 'LOG_EXPENSE' && parsed.data.amount) {
+          const accId = window.AppState.accounts[0]?.id || null;
+          await addDoc(collection(db, "transactions"), {
+            type: 'EXPENSE',
+            date: new Date().toISOString().split('T')[0],
+            amount: parsed.data.amount,
+            category: parsed.data.category || 'General',
+            fromAccountId: accId,
+            notes: 'Logged via Gemini Voice',
+            createdAt: serverTimestamp()
+          });
+        } else if (parsed.action === 'LOG_FUEL') {
+          const veh = window.AppState.vehicles.find(v => v.name.toLowerCase().includes(parsed.data.vehicleName?.toLowerCase())) || window.AppState.vehicles[0];
+          if (veh) {
+            await addDoc(collection(db, "vehicle_logs"), {
+              vehicleId: veh.id,
+              type: 'FUEL',
+              date: new Date().toISOString().split('T')[0],
+              amount: parsed.data.amount || 0,
+              odometer: parsed.data.odometer || veh.currentOdometer,
+              liters: parsed.data.liters || null,
+              details: 'Fuel fill via Voice',
+              createdAt: serverTimestamp()
+            });
+          }
+        }
+
+        replyBox.innerText = parsed.speechReply || "Task executed successfully.";
+        
+        // Text-to-speech output
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(parsed.speechReply);
+          utterance.lang = 'en-IN';
+          window.speechSynthesis.speak(utterance);
+        }
+
+      } catch (err) {
+        console.error(err);
+        replyBox.innerText = "Error executing AI command. Check API Key or format.";
+      }
+    }
+
+    // ----------------------------------------------------
+    // NAVIGATION & MODAL CONTROLLERS
+    // ----------------------------------------------------
+    window.switchTab = function(tabId) {
+      document.querySelectorAll('.tab-page').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.replace('text-brand-400', 'text-slate-400'));
+
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      const navBtn = document.getElementById(`nav-${tabId}`);
+      if (navBtn) navBtn.classList.replace('text-slate-400', 'text-brand-400');
+    };
+
+    window.openModal = function(id) { document.getElementById(id).classList.remove('hidden'); };
+    window.closeModal = function(id) { document.getElementById(id).classList.add('hidden'); };
+
+    window.openTransactionModal = function(type = 'EXPENSE') {
+      setTxnType(type);
+      openModal('txnModal');
+    };
+
+    window.setTxnType = function(type) {
+      document.getElementById('txnTypeInput').value = type;
+      document.querySelectorAll('#txnModal button[id^="typeBtn"]').forEach(btn => {
+        btn.className = "py-1.5 rounded-lg font-semibold text-center text-slate-400 transition";
+      });
+
+      const activeBtn = document.getElementById(`typeBtn${type.charAt(0) + type.slice(1).toLowerCase()}`);
+      if (activeBtn) activeBtn.className = "py-1.5 rounded-lg font-semibold text-center transition bg-brand-600/30 text-brand-300";
+
+      const toAccBox = document.getElementById('toAccountContainer');
+      const emiBox = document.getElementById('emiSplitContainer');
+      const catBox = document.getElementById('categoryContainer');
+
+      toAccBox.classList.toggle('hidden', type !== 'TRANSFER');
+      emiBox.classList.toggle('hidden', type !== 'LOAN_EMI');
+      catBox.classList.toggle('hidden', type === 'TRANSFER' || type === 'LOAN_EMI');
+
+      if (type === 'LOAN_EMI') handleEmiSplitCalculation();
+    };
+
+    window.openEmiPaymentModal = function(loanId) {
+      setTxnType('LOAN_EMI');
+      document.getElementById('txnLoanId').value = loanId;
+      const loan = window.AppState.loans.find(l => l.id === loanId);
+      if (loan) document.getElementById('txnAmount').value = loan.emiAmount;
+      handleEmiSplitCalculation();
+      openModal('txnModal');
+    };
+
+    window.openPartPaymentModal = function(loanId) {
+      setTxnType('LOAN_EMI');
+      document.getElementById('txnLoanId').value = loanId;
+      document.getElementById('emiOverrideToggle').checked = true;
+      toggleEmiOverride();
+      document.getElementById('txnAmount').value = 50000;
+      document.getElementById('emiPrincipalAmount').value = 50000;
+      document.getElementById('emiInterestAmount').value = 0;
+      openModal('txnModal');
+    };
+
+    window.openAccountModal = function() { openModal('accountModal'); };
+    window.openLoanModal = function() { openModal('loanModal'); };
+    window.openVehicleModal = function() { openModal('vehicleModal'); };
+    window.openServiceLogModal = function() { openModal('serviceLogModal'); };
+    window.openQuickFuelModal = function() { 
+      document.getElementById('logType').value = 'FUEL';
+      toggleLogTypeFields();
+      openModal('serviceLogModal'); 
+    };
+    window.openHealthModal = function() { openModal('healthModal'); };
+    window.openDocModal = function() { openModal('docModal'); };
+    window.openEntityModal = function() { openModal('entityModal'); };
+    window.openSettingsModal = function() { 
+      document.getElementById('geminiApiKeyInput').value = window.AppState.geminiKey;
+      openModal('settingsModal'); 
+    };
+
+    window.saveSettings = function() {
+      const key = document.getElementById('geminiApiKeyInput').value.trim();
+      localStorage.setItem('chuvadi_gemini_key', key);
+      window.AppState.geminiKey = key;
+      closeModal('settingsModal');
+      alert('Settings saved successfully!');
+    };
+
+    window.toggleLogTypeFields = function() {
+      const type = document.getElementById('logType').value;
+      document.getElementById('fuelLitersContainer').classList.toggle('hidden', type !== 'FUEL');
+    };
+    window.toggleDocTaskFields = function() {
+      const checked = document.getElementById('docHasTask').checked;
+      document.getElementById('docTaskDetailsContainer').classList.toggle('hidden', !checked);
+    };
+
+    // Start App & Real-time Listeners
+    initListeners();
+    lucide.createIcons();
+  </script>
+</body>
+</html>
