@@ -65,7 +65,7 @@
           <div class="flex items-center gap-2">
             <h1 class="text-base font-bold tracking-tight text-white">Chuvadi</h1>
             <span class="text-xs italic text-brand-300 font-serif tracking-normal">a way of life</span>
-            <span class="text-[10px] font-mono font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-1.5 py-0.2 rounded" id="appHeaderVersion">v1.4.0</span>
+            <span class="text-[10px] font-mono font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-1.5 py-0.2 rounded" id="appHeaderVersion">v1.5.0</span>
           </div>
           <p id="headerDate" class="text-xs text-slate-400">Loading date...</p>
         </div>
@@ -180,20 +180,24 @@
           <p class="text-xs text-slate-400">Tap an account to open its Passbook & statement</p>
         </div>
         <div class="flex gap-2">
-          <button onclick="openAddAccountModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
+          <!-- Add Entry Button -->
+          <button onclick="openTransactionModal('EXPENSE')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow transition">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Entry
+          </button>
+          <button onclick="openAddAccountModal()" class="px-3 py-1.5 bg-dark-card hover:bg-slate-800 border border-dark-border text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow transition">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Account
           </button>
         </div>
       </div>
 
-      <!-- Compact Bank Accounts List -->
+      <!-- Compact Bank & Credit Card Accounts List -->
       <div class="space-y-2.5">
         <div class="flex justify-between items-center">
-          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Accounts & Assets</span>
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Accounts & Cards</span>
           <span class="text-[10px] text-slate-500 italic">Tap to open Passbook</span>
         </div>
         <div id="accountsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <!-- Loaded dynamically (compact cards) -->
+          <!-- Loaded dynamically (compact cards without "View Statement" text or external buttons) -->
         </div>
       </div>
 
@@ -234,12 +238,12 @@
       </div>
     </section>
 
-    <!-- TAB 3: EXPENSE REPORTS (NEW MODULE) -->
+    <!-- TAB 3: EXPENSE REPORTS -->
     <section id="tab-reports" class="tab-page space-y-6 hidden">
       <div class="flex justify-between items-center">
         <div>
-          <h2 class="text-lg font-bold text-white">Expense Analytics</h2>
-          <p class="text-xs text-slate-400">Category breakdown and spending trends</p>
+          <h2 class="text-lg font-bold text-white">Reports & Net Worth</h2>
+          <p class="text-xs text-slate-400">Balances breakdown & spending analytics</p>
         </div>
         <div>
           <select id="reportPeriodSelect" onchange="renderExpenseReports()" class="bg-dark-card border border-dark-border rounded-xl px-3 py-1.5 text-xs text-brand-300 font-semibold focus:outline-none">
@@ -248,6 +252,31 @@
             <option value="THIS_YEAR">This Year</option>
             <option value="ALL_TIME">All Time</option>
           </select>
+        </div>
+      </div>
+
+      <!-- Expandable All Accounts Balance Breakdown -->
+      <div class="bg-dark-card border border-dark-border rounded-2xl overflow-hidden shadow-lg">
+        <button onclick="toggleAccountsSummaryAccordion()" class="w-full p-4 flex justify-between items-center text-left hover:bg-dark-hover transition">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center">
+              <i data-lucide="layers" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-semibold block">Total Net Worth (Main Balance)</span>
+              <span id="repMainNetBalance" class="text-lg font-extrabold text-white">₹0</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-brand-400 font-semibold">
+            <span id="repAccordionToggleText">Show Breakdown</span>
+            <i id="repAccordionIcon" data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300"></i>
+          </div>
+        </button>
+
+        <div id="repAccountsBreakdownBody" class="hidden border-t border-dark-border/60 p-4 bg-dark-bg/60 space-y-3">
+          <div id="repAccountsGroupList" class="space-y-3">
+            <!-- Dynamically populated category/account breakdown -->
+          </div>
         </div>
       </div>
 
@@ -269,7 +298,6 @@
 
       <!-- Chart & Breakdown Section -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-        <!-- Doughnut Chart -->
         <div class="bg-dark-card border border-dark-border p-5 rounded-2xl flex flex-col items-center justify-center min-h-[300px]">
           <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3 self-start">Category Distribution</h3>
           <div class="w-full max-w-[240px] aspect-square relative flex items-center justify-center">
@@ -277,11 +305,10 @@
           </div>
         </div>
 
-        <!-- Detailed Breakdown Bars -->
         <div class="bg-dark-card border border-dark-border p-5 rounded-2xl space-y-4">
           <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400">Category Breakdown</h3>
           <div id="repCategoryList" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar">
-            <!-- Dynamically populated category progress items -->
+            <!-- Dynamically populated category items -->
           </div>
         </div>
       </div>
@@ -354,16 +381,16 @@
 
   </main>
 
-  <!-- ================= FLOATING AI VOICE BUTTON ================= -->
-  <div class="fixed bottom-20 inset-x-0 flex justify-center z-40 pointer-events-none">
-    <button onclick="toggleVoiceOverlay()" class="pointer-events-auto w-14 h-14 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-500 text-white shadow-2xl shadow-brand-500/50 flex items-center justify-center hover:scale-105 active:scale-95 transition border-2 border-white/20">
+  <!-- ================= FLOATING AI VOICE BUTTON (BOTTOM RIGHT) ================= -->
+  <div class="fixed bottom-20 right-5 z-40 pointer-events-auto">
+    <button onclick="toggleVoiceOverlay()" class="w-13 h-13 p-3.5 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-500 text-white shadow-2xl shadow-brand-500/50 flex items-center justify-center hover:scale-105 active:scale-95 transition border-2 border-white/20">
       <i data-lucide="mic" class="w-6 h-6"></i>
     </button>
   </div>
 
-  <!-- ================= BOTTOM NAVIGATION BAR ================= -->
-  <nav class="fixed bottom-0 inset-x-0 bg-dark-bg/95 backdrop-blur-lg border-t border-dark-border z-30 px-2 py-2">
-    <div class="max-w-md mx-auto grid grid-cols-5 items-center justify-around text-center">
+  <!-- ================= BOTTOM NAVIGATION BAR (CLEAN 4-TAB LAYOUT) ================= -->
+  <nav class="fixed bottom-0 inset-x-0 bg-dark-bg/95 backdrop-blur-lg border-t border-dark-border z-30 px-4 py-2">
+    <div class="max-w-md mx-auto grid grid-cols-4 items-center justify-around text-center">
       <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn flex flex-col items-center py-1 text-brand-400 font-semibold transition">
         <i data-lucide="layout-grid" class="w-5 h-5 mb-1"></i>
         <span class="text-[10px]">Dashboard</span>
@@ -373,10 +400,6 @@
         <i data-lucide="wallet" class="w-5 h-5 mb-1"></i>
         <span class="text-[10px]">Finance</span>
       </button>
-
-      <div class="flex flex-col items-center pointer-events-none">
-        <span class="text-[10px] text-slate-500 mt-6 font-medium">Assistant</span>
-      </div>
 
       <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
         <i data-lucide="pie-chart" class="w-5 h-5 mb-1"></i>
@@ -569,7 +592,7 @@
     </div>
   </div>
 
-  <!-- 3. Account Passbook Modal (Contains inside Edit & Delete buttons) -->
+  <!-- 3. Account Passbook Modal -->
   <div id="passbookModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-dark-border/60 pb-3">
@@ -612,7 +635,7 @@
       <div class="flex justify-between items-center">
         <div>
           <h3 id="accountModalTitle" class="text-base font-bold text-white">Add Financial Account</h3>
-          <p id="accountModalSubtitle" class="text-[11px] text-slate-400">Configure bank account, investment, asset or receivable</p>
+          <p id="accountModalSubtitle" class="text-[11px] text-slate-400">Configure bank account, credit card, investment or receivable</p>
         </div>
         <button onclick="closeModal('accountModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -623,7 +646,8 @@
         <div>
           <label class="block text-slate-400 mb-1">Account Type</label>
           <select id="accType" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
-            <option value="BANK_ACCOUNT">Bank Account / Wallet</option>
+            <option value="BANK_ACCOUNT">Bank Account / Savings / Wallet</option>
+            <option value="CREDIT_CARD">Credit Card (Debt / Spends)</option>
             <option value="RECEIVABLE_ACCOUNT">Receivable Account</option>
             <option value="INVESTMENT_PF">Retirement & Long-Term (EPF / PPF / MFs)</option>
             <option value="FIXED_ASSET">Fixed Asset (House Share / Vehicle Equity)</option>
@@ -631,17 +655,17 @@
         </div>
 
         <div>
-          <label class="block text-slate-400 mb-1">Account / Asset Name</label>
-          <input type="text" id="accName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. HDFC Salary, ICICI Spends, Rental Receivable" />
+          <label class="block text-slate-400 mb-1">Account / Card Name</label>
+          <input type="text" id="accName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. HDFC Salary, ICICI Credit Card, Rental Receivable" />
         </div>
 
         <div>
           <label class="block text-slate-400 mb-1">Purpose / Tag</label>
-          <input type="text" id="accPurpose" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Salary Inflow, Daily Spends, Investment" />
+          <input type="text" id="accPurpose" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Salary Inflow, Fuel & Groceries, Long-term" />
         </div>
 
         <div>
-          <label class="block text-slate-400 mb-1">Opening Balance (₹)</label>
+          <label class="block text-slate-400 mb-1" id="accBalanceLabel">Current Balance / Outstanding (₹)</label>
           <input type="number" step="0.01" id="accOpeningBalance" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="0.00" />
         </div>
 
@@ -809,7 +833,7 @@
       <form id="docForm" onsubmit="saveDocument(event)" class="space-y-3 text-xs">
         <div>
           <label class="block text-slate-400 mb-1">Document Title</label>
-          <input type="text" id="docTitle" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Aadhaar Card, PAN Card, Voter ID, Car RC" />
+          <input type="text" id="docTitle" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. PAN Card, Voter ID, Car RC, Identity Card" />
         </div>
 
         <div class="grid grid-cols-2 gap-2">
@@ -904,7 +928,7 @@
             <span class="font-bold text-white block">Application Version</span>
             <span class="text-[11px] text-slate-400">Chuvadi Build</span>
           </div>
-          <span class="text-xs font-mono font-bold text-brand-300 bg-brand-500/20 border border-brand-500/30 px-2 py-0.5 rounded" id="appSettingsVersion">v1.4.0</span>
+          <span class="text-xs font-mono font-bold text-brand-300 bg-brand-500/20 border border-brand-500/30 px-2 py-0.5 rounded" id="appSettingsVersion">v1.5.0</span>
         </div>
 
         <div>
@@ -943,7 +967,7 @@
     } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
     // Application Version
-    const APP_VERSION = "v1.4.0";
+    const APP_VERSION = "v1.5.0";
     document.getElementById('appHeaderVersion').innerText = APP_VERSION;
     document.getElementById('appSettingsVersion').innerText = APP_VERSION;
 
@@ -974,7 +998,8 @@
       geminiKey: localStorage.getItem('chuvadi_gemini_key') || '',
       activePassbookAccountId: null,
       selectedActionTxnId: null,
-      expenseChartInstance: null
+      expenseChartInstance: null,
+      isAccountsAccordionOpen: false
     };
 
     function formatDate(d) {
@@ -1003,6 +1028,7 @@
         populateAccountSelects();
         renderTransactionHistory();
         renderRecentTransactions();
+        renderExpenseReports();
         if (window.AppState.activePassbookAccountId) {
           renderPassbook(window.AppState.activePassbookAccountId);
         }
@@ -1025,7 +1051,8 @@
         window.AppState.entities = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderEntities();
         updateDashboardMetrics();
-        populateAccountSelects(); // Updates transfer dropdowns with person receivables
+        populateAccountSelects();
+        renderExpenseReports();
       });
 
       // 4. Vehicles
@@ -1062,11 +1089,12 @@
     // ----------------------------------------------------
     function updateDashboardMetrics() {
       let liquid = 0, assets = 0, receivables = 0, monthSpend = 0;
-      const currentMonthKey = new Date().toISOString().slice(0, 7); // YYYY-MM
+      const currentMonthKey = new Date().toISOString().slice(0, 7);
 
       window.AppState.accounts.forEach(acc => {
         const bal = Number(acc.balance) || 0;
         if (acc.type === 'BANK_ACCOUNT' || !acc.type) liquid += bal;
+        else if (acc.type === 'CREDIT_CARD') liquid -= bal; // Outstanding reduces liquid
         else if (acc.type === 'RECEIVABLE_ACCOUNT') receivables += bal;
         else if (acc.type === 'INVESTMENT_PF' || acc.type === 'FIXED_ASSET') assets += bal;
       });
@@ -1159,7 +1187,7 @@
     }
 
     // ----------------------------------------------------
-    // COMPACT BANK ACCOUNTS & PASSBOOK MODULE
+    // COMPACT ACCOUNTS LIST & PASSBOOK
     // ----------------------------------------------------
     function renderAccounts() {
       const container = document.getElementById('accountsList');
@@ -1168,19 +1196,29 @@
         return;
       }
       
-      // Compact accounts display: No liquid badge, no outer buttons
-      container.innerHTML = window.AppState.accounts.map(acc => `
-        <div onclick="openPassbookModal('${acc.id}')" class="bg-dark-card hover:bg-dark-hover border border-dark-border px-3.5 py-2.5 rounded-xl flex justify-between items-center cursor-pointer transition shadow-sm group">
-          <div class="min-w-0 flex-1 pr-2">
-            <h4 class="text-xs font-bold text-white group-hover:text-brand-300 truncate transition">${acc.name}</h4>
-            <p class="text-[10px] text-slate-400 truncate mt-0.5">${acc.purpose || 'Passbook Statement'}</p>
+      container.innerHTML = window.AppState.accounts.map(acc => {
+        const isCreditCard = acc.type === 'CREDIT_CARD';
+        const iconName = isCreditCard ? 'credit-card' : acc.type === 'INVESTMENT_PF' ? 'trending-up' : acc.type === 'FIXED_ASSET' ? 'building' : acc.type === 'RECEIVABLE_ACCOUNT' ? 'user-check' : 'landmark';
+        const iconColor = isCreditCard ? 'text-amber-400' : 'text-brand-400';
+        const balanceColor = isCreditCard ? 'text-amber-400' : 'text-white';
+
+        return `
+          <div onclick="openPassbookModal('${acc.id}')" class="bg-dark-card hover:bg-dark-hover border border-dark-border px-3.5 py-2.5 rounded-xl flex justify-between items-center cursor-pointer transition shadow-sm group">
+            <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
+              <div class="w-7 h-7 rounded-lg bg-dark-bg flex items-center justify-center shrink-0 border border-dark-border/60">
+                <i data-lucide="${iconName}" class="w-3.5 h-3.5 ${iconColor}"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-xs font-bold text-white group-hover:text-brand-300 truncate transition">${acc.name}</h4>
+                <p class="text-[10px] text-slate-400 truncate">${acc.purpose || (isCreditCard ? 'Credit Card' : 'Passbook')}</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-xs font-extrabold ${balanceColor} block">${formatCurrency(acc.balance)}</span>
+            </div>
           </div>
-          <div class="text-right shrink-0">
-            <span class="text-xs font-extrabold text-white block">${formatCurrency(acc.balance)}</span>
-            <span class="text-[9px] text-brand-400 font-medium opacity-80">View Statement →</span>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
       lucide.createIcons();
     }
 
@@ -1198,7 +1236,6 @@
       document.getElementById('pbAccountPurpose').innerText = `${acc.purpose || 'Statement'} • Passbook`;
       document.getElementById('pbAccountBalance').innerText = formatCurrency(acc.balance);
       
-      // Inside Edit & Delete buttons
       document.getElementById('pbEditAccountBtn').onclick = () => {
         closeModal('passbookModal');
         openEditAccountModal(acc.id);
@@ -1274,7 +1311,6 @@
         }).join('');
       }
 
-      // Opening balance at the end of the statement if not 0
       const openingBal = Number(acc.openingBalance !== undefined ? acc.openingBalance : (acc.balance || 0));
       if (openingBal !== 0) {
         itemsHtml += `
@@ -1303,7 +1339,7 @@
       document.getElementById('accEditId').value = '';
       document.getElementById('accountForm').reset();
       document.getElementById('accountModalTitle').innerText = "Add Financial Account";
-      document.getElementById('accountModalSubtitle').innerText = "Configure bank account, investment, asset or receivable";
+      document.getElementById('accountModalSubtitle').innerText = "Configure bank account, credit card, investment or receivable";
       document.getElementById('accSubmitBtn').innerText = "Save Account";
       openModal('accountModal');
     };
@@ -1362,7 +1398,6 @@
       document.getElementById('accEditId').value = '';
     };
 
-    // Helper: Resolves names across both accounts and receivable entities
     function getAccountOrEntityName(id) {
       if (!id) return 'Account';
       const acc = window.AppState.accounts.find(a => a.id === id);
@@ -1372,14 +1407,33 @@
       return 'Account';
     }
 
-    // Populate From & To selects including all accounts & receivable entities
     function populateAccountSelects() {
       const fromSel = document.getElementById('txnFromAccount');
       const toSel = document.getElementById('txnToAccount');
 
-      let options = '<optgroup label="Bank & Asset Accounts">';
-      options += window.AppState.accounts.map(a => `<option value="${a.id}">${a.name} (${formatCurrency(a.balance)})</option>`).join('');
-      options += '</optgroup>';
+      let options = '';
+      
+      const banks = window.AppState.accounts.filter(a => a.type === 'BANK_ACCOUNT' || !a.type);
+      const cards = window.AppState.accounts.filter(a => a.type === 'CREDIT_CARD');
+      const others = window.AppState.accounts.filter(a => a.type !== 'BANK_ACCOUNT' && a.type !== 'CREDIT_CARD' && a.type);
+
+      if (banks.length > 0) {
+        options += '<optgroup label="Bank Accounts & Wallets">';
+        options += banks.map(a => `<option value="${a.id}">${a.name} (${formatCurrency(a.balance)})</option>`).join('');
+        options += '</optgroup>';
+      }
+
+      if (cards.length > 0) {
+        options += '<optgroup label="Credit Cards">';
+        options += cards.map(a => `<option value="${a.id}">${a.name} (Due: ${formatCurrency(a.balance)})</option>`).join('');
+        options += '</optgroup>';
+      }
+
+      if (others.length > 0) {
+        options += '<optgroup label="Investments & Assets">';
+        options += others.map(a => `<option value="${a.id}">${a.name} (${formatCurrency(a.balance)})</option>`).join('');
+        options += '</optgroup>';
+      }
 
       if (window.AppState.entities.length > 0) {
         options += '<optgroup label="Receivables / People">';
@@ -1392,13 +1446,88 @@
     }
 
     // ----------------------------------------------------
-    // EXPENSE REPORTS ENGINE (NEW MODULE)
+    // EXPENSE REPORTS & EXPANDABLE ACCOUNTS BREAKDOWN
     // ----------------------------------------------------
+    window.toggleAccountsSummaryAccordion = function() {
+      window.AppState.isAccountsAccordionOpen = !window.AppState.isAccountsAccordionOpen;
+      const body = document.getElementById('repAccountsBreakdownBody');
+      const text = document.getElementById('repAccordionToggleText');
+      const icon = document.getElementById('repAccordionIcon');
+
+      if (window.AppState.isAccountsAccordionOpen) {
+        body.classList.remove('hidden');
+        text.innerText = 'Hide Breakdown';
+        icon.classList.add('rotate-180');
+      } else {
+        body.classList.add('hidden');
+        text.innerText = 'Show Breakdown';
+        icon.classList.remove('rotate-180');
+      }
+    };
+
     window.renderExpenseReports = function() {
+      // 1. Calculate & Render Expandable Accounts Summary
+      let totalNetWorth = 0;
+      const groupMap = {
+        'Bank Accounts': [],
+        'Credit Cards': [],
+        'Receivables (People)': [],
+        'Investments & Assets': []
+      };
+
+      window.AppState.accounts.forEach(acc => {
+        const bal = Number(acc.balance) || 0;
+        if (acc.type === 'BANK_ACCOUNT' || !acc.type) {
+          totalNetWorth += bal;
+          groupMap['Bank Accounts'].push({ name: acc.name, balance: bal, color: 'text-white' });
+        } else if (acc.type === 'CREDIT_CARD') {
+          totalNetWorth -= bal; // Outstanding debt
+          groupMap['Credit Cards'].push({ name: acc.name, balance: bal, isDebt: true, color: 'text-amber-400' });
+        } else if (acc.type === 'RECEIVABLE_ACCOUNT') {
+          totalNetWorth += bal;
+          groupMap['Receivables (People)'].push({ name: acc.name, balance: bal, color: 'text-emerald-400' });
+        } else {
+          totalNetWorth += bal;
+          groupMap['Investments & Assets'].push({ name: acc.name, balance: bal, color: 'text-indigo-300' });
+        }
+      });
+
+      window.AppState.entities.forEach(ent => {
+        const amt = Number(ent.amount) || 0;
+        if (ent.type === 'RECEIVABLE') {
+          totalNetWorth += amt;
+          groupMap['Receivables (People)'].push({ name: ent.name, balance: amt, color: 'text-emerald-400' });
+        } else {
+          totalNetWorth -= amt;
+          groupMap['Receivables (People)'].push({ name: `${ent.name} (Payable)`, balance: amt, isDebt: true, color: 'text-rose-400' });
+        }
+      });
+
+      const mainNetEl = document.getElementById('repMainNetBalance');
+      if (mainNetEl) mainNetEl.innerText = formatCurrency(totalNetWorth);
+
+      const groupListContainer = document.getElementById('repAccountsGroupList');
+      if (groupListContainer) {
+        groupListContainer.innerHTML = Object.entries(groupMap).filter(([_, items]) => items.length > 0).map(([groupTitle, items]) => `
+          <div class="space-y-1.5">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">${groupTitle}</span>
+            <div class="bg-dark-card border border-dark-border/80 rounded-xl p-2.5 space-y-1.5 divide-y divide-dark-border/40">
+              ${items.map(item => `
+                <div class="flex justify-between items-center text-xs pt-1.5 first:pt-0">
+                  <span class="text-slate-300">${item.name}</span>
+                  <span class="font-bold ${item.color}">${item.isDebt ? '- ' : ''}${formatCurrency(item.balance)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 2. Calculate Period Expenses & Render Charts
       const period = document.getElementById('reportPeriodSelect')?.value || 'THIS_MONTH';
       const today = new Date();
       const currentYear = today.getFullYear();
-      const currentMonth = today.getMonth(); // 0-indexed
+      const currentMonth = today.getMonth();
 
       let filteredTxns = window.AppState.transactions.filter(t => t.type === 'EXPENSE');
 
@@ -1414,7 +1543,6 @@
         filteredTxns = filteredTxns.filter(t => t.date && t.date.startsWith(key));
       }
 
-      // Compute category sums
       const catMap = {};
       let totalSpent = 0;
       filteredTxns.forEach(t => {
@@ -1424,26 +1552,22 @@
         totalSpent += amt;
       });
 
-      // KPI cards update
       const totalEl = document.getElementById('repTotalSpent');
       const dailyEl = document.getElementById('repDailyAverage');
       const topCatEl = document.getElementById('repTopCategory');
 
       if (totalEl) totalEl.innerText = formatCurrency(totalSpent);
 
-      // Days elapsed calculation for daily average
       let daysCount = 30;
       if (period === 'THIS_MONTH') daysCount = Math.max(1, today.getDate());
       else if (period === 'THIS_YEAR') daysCount = Math.max(1, Math.ceil((today - new Date(currentYear, 0, 1)) / (1000 * 60 * 60 * 24)));
       if (dailyEl) dailyEl.innerText = formatCurrency(totalSpent / daysCount);
 
-      // Identify top category
       const sortedCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
       if (topCatEl) {
         topCatEl.innerText = sortedCats.length > 0 ? `${sortedCats[0][0]} (${formatCurrency(sortedCats[0][1])})` : 'No expenses';
       }
 
-      // Render category progress list
       const catListContainer = document.getElementById('repCategoryList');
       if (catListContainer) {
         if (sortedCats.length === 0) {
@@ -1469,7 +1593,6 @@
         }
       }
 
-      // Render Chart.js Doughnut Chart
       const ctx = document.getElementById('expenseChart')?.getContext('2d');
       if (ctx) {
         if (window.AppState.expenseChartInstance) {
@@ -1503,7 +1626,7 @@
     };
 
     // ----------------------------------------------------
-    // TRANSACTION ACTION POPUP (Feature 3)
+    // TRANSACTION ACTION POPUP
     // ----------------------------------------------------
     window.openTxnActionModal = function(txnId) {
       const t = window.AppState.transactions.find(item => item.id === txnId);
@@ -1792,10 +1915,26 @@
       const container = document.getElementById('multiTransferRows');
       const rowId = 'split_row_' + Math.random().toString(36).substr(2, 9);
       
-      let accOptions = '<optgroup label="Accounts">';
-      accOptions += window.AppState.accounts.map(a => `<option value="${a.id}" ${a.id === targetAccId ? 'selected' : ''}>${a.name}</option>`).join('');
-      accOptions += '</optgroup>';
+      let accOptions = '';
+      const banks = window.AppState.accounts.filter(a => a.type === 'BANK_ACCOUNT' || !a.type);
+      const cards = window.AppState.accounts.filter(a => a.type === 'CREDIT_CARD');
+      const others = window.AppState.accounts.filter(a => a.type !== 'BANK_ACCOUNT' && a.type !== 'CREDIT_CARD' && a.type);
 
+      if (banks.length > 0) {
+        accOptions += '<optgroup label="Bank Accounts & Wallets">';
+        accOptions += banks.map(a => `<option value="${a.id}" ${a.id === targetAccId ? 'selected' : ''}>${a.name}</option>`).join('');
+        accOptions += '</optgroup>';
+      }
+      if (cards.length > 0) {
+        accOptions += '<optgroup label="Credit Cards">';
+        accOptions += cards.map(a => `<option value="${a.id}" ${a.id === targetAccId ? 'selected' : ''}>${a.name}</option>`).join('');
+        accOptions += '</optgroup>';
+      }
+      if (others.length > 0) {
+        accOptions += '<optgroup label="Investments & Assets">';
+        accOptions += others.map(a => `<option value="${a.id}" ${a.id === targetAccId ? 'selected' : ''}>${a.name}</option>`).join('');
+        accOptions += '</optgroup>';
+      }
       if (window.AppState.entities.length > 0) {
         accOptions += '<optgroup label="Receivables / People">';
         accOptions += window.AppState.entities.map(e => `<option value="${e.id}" ${e.id === targetAccId ? 'selected' : ''}>${e.name}</option>`).join('');
@@ -1896,22 +2035,34 @@
       const amt = Number(oldTxn.amount) || 0;
       if (oldTxn.type === 'EXPENSE' && oldTxn.fromAccountId) {
         const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
-        if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + amt });
+        if (from) {
+          const delta = from.type === 'CREDIT_CARD' ? -amt : amt;
+          await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + delta });
+        }
       } else if (oldTxn.type === 'INCOME' && oldTxn.fromAccountId) {
         const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
         if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance - amt });
       } else if (oldTxn.type === 'TRANSFER') {
         const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
         const to = window.AppState.accounts.find(a => a.id === oldTxn.toAccountId);
-        if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + amt });
-        if (to) await updateDoc(doc(db, "accounts", oldTxn.toAccountId), { balance: to.balance - amt });
+        if (from) {
+          const delta = from.type === 'CREDIT_CARD' ? -amt : amt;
+          await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + delta });
+        }
+        if (to) {
+          const delta = to.type === 'CREDIT_CARD' ? amt : -amt;
+          await updateDoc(doc(db, "accounts", oldTxn.toAccountId), { balance: to.balance + delta });
+        }
       } else if (oldTxn.type === 'MULTI_TRANSFER') {
         const from = window.AppState.accounts.find(a => a.id === oldTxn.fromAccountId);
         if (from) await updateDoc(doc(db, "accounts", oldTxn.fromAccountId), { balance: from.balance + amt });
         if (oldTxn.splits) {
           for (const s of oldTxn.splits) {
             const toAcc = window.AppState.accounts.find(a => a.id === s.toAccountId);
-            if (toAcc) await updateDoc(doc(db, "accounts", s.toAccountId), { balance: toAcc.balance - (Number(s.amount) || 0) });
+            if (toAcc) {
+              const delta = toAcc.type === 'CREDIT_CARD' ? Number(s.amount) : -Number(s.amount);
+              await updateDoc(doc(db, "accounts", s.toAccountId), { balance: toAcc.balance + delta });
+            }
           }
         }
       }
@@ -1964,20 +2115,23 @@
         for (const s of splits) {
           const targetAcc = window.AppState.accounts.find(a => a.id === s.toAccountId);
           if (targetAcc) {
-            await updateDoc(doc(db, "accounts", s.toAccountId), { balance: targetAcc.balance + s.amount });
+            const delta = targetAcc.type === 'CREDIT_CARD' ? -s.amount : s.amount;
+            await updateDoc(doc(db, "accounts", s.toAccountId), { balance: targetAcc.balance + delta });
           }
         }
       } else {
         if (fromAccId && (type === 'EXPENSE' || type === 'TRANSFER')) {
           const fromAcc = window.AppState.accounts.find(a => a.id === fromAccId);
           if (fromAcc) {
-            await updateDoc(doc(db, "accounts", fromAccId), { balance: fromAcc.balance - amount });
+            const delta = fromAcc.type === 'CREDIT_CARD' ? amount : -amount;
+            await updateDoc(doc(db, "accounts", fromAccId), { balance: fromAcc.balance + delta });
           }
         }
         if (toAccId && type === 'TRANSFER') {
           const toAcc = window.AppState.accounts.find(a => a.id === toAccId);
           if (toAcc) {
-            await updateDoc(doc(db, "accounts", toAccId), { balance: toAcc.balance + amount });
+            const delta = toAcc.type === 'CREDIT_CARD' ? -amount : amount;
+            await updateDoc(doc(db, "accounts", toAccId), { balance: toAcc.balance + delta });
           }
         }
         if (fromAccId && type === 'INCOME') {
@@ -2322,7 +2476,7 @@ Return JSON ONLY:
           addMultiTransferRow();
         }
       } else {
-        fromLabel.innerText = type === 'INCOME' ? 'Receiving Bank Account' : 'From Bank Account';
+        fromLabel.innerText = type === 'INCOME' ? 'Receiving Bank Account' : 'From Bank Account / Card';
       }
     };
 
