@@ -65,7 +65,7 @@
           <div class="flex items-center gap-2">
             <h1 class="text-base font-bold tracking-tight text-white">Chuvadi</h1>
             <span class="text-xs italic text-brand-300 font-serif tracking-normal">a way of life</span>
-            <span class="text-[10px] font-mono font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-1.5 py-0.2 rounded" id="appHeaderVersion">v1.5.0</span>
+            <span class="text-[10px] font-mono font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30 px-1.5 py-0.2 rounded" id="appHeaderVersion">v1.6.0</span>
           </div>
           <p id="headerDate" class="text-xs text-slate-400">Loading date...</p>
         </div>
@@ -84,7 +84,6 @@
 
     <!-- TAB 1: DASHBOARD (COMMAND CENTER) -->
     <section id="tab-dashboard" class="tab-page space-y-6">
-      
       <!-- Financial Snapshot Card -->
       <div class="bg-gradient-to-br from-dark-card to-slate-900 border border-dark-border rounded-2xl p-5 shadow-xl">
         <div class="flex justify-between items-start mb-4">
@@ -146,11 +145,11 @@
             <span class="text-xs font-semibold text-white">Transfer Funds</span>
           </button>
 
-          <button onclick="openTransactionModal('MULTI_TRANSFER')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
-            <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
-              <i data-lucide="split" class="w-5 h-5"></i>
+          <button onclick="switchTab('todos')" class="bg-dark-card hover:bg-dark-hover border border-dark-border p-3.5 rounded-2xl flex flex-col items-center justify-center text-center transition group">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <i data-lucide="check-square" class="w-5 h-5"></i>
             </div>
-            <span class="text-xs font-semibold text-white">Salary Split (1→N)</span>
+            <span class="text-xs font-semibold text-white">To-Do Lists</span>
           </button>
         </div>
       </div>
@@ -177,10 +176,9 @@
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-lg font-bold text-white">Accounts & Ledger</h2>
-          <p class="text-xs text-slate-400">Tap an account to open its Passbook & statement</p>
+          <p class="text-xs text-slate-400">Tap an account to open its Passbook statement</p>
         </div>
         <div class="flex gap-2">
-          <!-- Add Entry Button -->
           <button onclick="openTransactionModal('EXPENSE')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow transition">
             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Entry
           </button>
@@ -190,15 +188,13 @@
         </div>
       </div>
 
-      <!-- Compact Bank & Credit Card Accounts List -->
+      <!-- Compact Accounts List -->
       <div class="space-y-2.5">
         <div class="flex justify-between items-center">
           <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Accounts & Cards</span>
           <span class="text-[10px] text-slate-500 italic">Tap to open Passbook</span>
         </div>
-        <div id="accountsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <!-- Loaded dynamically (compact cards without "View Statement" text or external buttons) -->
-        </div>
+        <div id="accountsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
       </div>
 
       <!-- Receivables & Payables Ledger -->
@@ -210,9 +206,7 @@
           </div>
           <button onclick="openEntityModal()" class="text-xs text-brand-400 font-semibold hover:underline">+ Add Person</button>
         </div>
-        <div id="entitiesList" class="space-y-2">
-          <!-- Loaded dynamically -->
-        </div>
+        <div id="entitiesList" class="space-y-2"></div>
       </div>
 
       <!-- Full Transaction History with Filter -->
@@ -220,7 +214,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div class="flex items-center gap-2">
             <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Transaction History</span>
-            <span class="text-[10px] text-slate-500 italic">(Tap row for edit/clone/delete popup)</span>
+            <span class="text-[10px] text-slate-500 italic">(Tap row for options)</span>
           </div>
           <div class="flex gap-2 w-full sm:w-auto">
             <select id="txnFilterType" onchange="renderTransactionHistory()" class="bg-dark-card border border-dark-border rounded-xl px-2.5 py-1 text-xs text-slate-300 focus:outline-none">
@@ -232,13 +226,57 @@
             </select>
           </div>
         </div>
-        <div id="fullTxnList" class="space-y-2">
-          <!-- Loaded dynamically -->
+        <div id="fullTxnList" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: TO-DO LISTS (GOOGLE KEEP STYLE WITH CHECKBOXES) -->
+    <section id="tab-todos" class="tab-page space-y-6 hidden">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-white">To-Do Lists & Notes</h2>
+          <p class="text-xs text-slate-400">Checklist items with Google Keep style functionality</p>
+        </div>
+      </div>
+
+      <!-- Google Keep-Style Note/Checklist Creator -->
+      <div class="bg-dark-card border border-dark-border rounded-2xl p-4 shadow-xl max-w-xl mx-auto space-y-3">
+        <div class="flex items-center justify-between">
+          <input type="text" id="newTodoTitle" placeholder="Title (e.g. Aadhaar address update checklist)" class="bg-transparent font-bold text-sm text-white placeholder-slate-500 focus:outline-none w-full" />
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 font-semibold border border-brand-500/30">New List</span>
+        </div>
+
+        <!-- Dynamic Items Builder -->
+        <div id="newTodoItemsContainer" class="space-y-2 pt-1 border-t border-dark-border/60">
+          <div class="flex items-center gap-2 text-xs">
+            <i data-lucide="square" class="w-4 h-4 text-slate-500 shrink-0"></i>
+            <input type="text" class="new-todo-item-input flex-1 bg-dark-bg border border-dark-border rounded-xl px-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500" placeholder="List item..." onkeydown="handleTodoItemKeydown(event)" />
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center pt-2">
+          <button type="button" onclick="addNewItemRowToCreator()" class="text-xs text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add item
+          </button>
+          <button type="button" onclick="saveNewTodoNote()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-brand-500/20">
+            Save Note
+          </button>
+        </div>
+      </div>
+
+      <!-- Notes Masonry Grid -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Pinned & Active Lists</span>
+          <span id="todosCountBadge" class="text-[10px] text-slate-500 font-medium">0 notes</span>
+        </div>
+        <div id="todosNotesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Dynamically loaded Keep-style notes -->
         </div>
       </div>
     </section>
 
-    <!-- TAB 3: EXPENSE REPORTS -->
+    <!-- TAB 4: EXPENSE REPORTS -->
     <section id="tab-reports" class="tab-page space-y-6 hidden">
       <div class="flex justify-between items-center">
         <div>
@@ -274,9 +312,7 @@
         </button>
 
         <div id="repAccountsBreakdownBody" class="hidden border-t border-dark-border/60 p-4 bg-dark-bg/60 space-y-3">
-          <div id="repAccountsGroupList" class="space-y-3">
-            <!-- Dynamically populated category/account breakdown -->
-          </div>
+          <div id="repAccountsGroupList" class="space-y-3"></div>
         </div>
       </div>
 
@@ -307,14 +343,12 @@
 
         <div class="bg-dark-card border border-dark-border p-5 rounded-2xl space-y-4">
           <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400">Category Breakdown</h3>
-          <div id="repCategoryList" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar">
-            <!-- Dynamically populated category items -->
-          </div>
+          <div id="repCategoryList" class="space-y-3 max-h-80 overflow-y-auto no-scrollbar"></div>
         </div>
       </div>
     </section>
 
-    <!-- TAB 4: THE GARAGE (VEHICLES & TELEMETRY) -->
+    <!-- TAB 5: THE GARAGE (VEHICLES & TELEMETRY) -->
     <section id="tab-garage" class="tab-page space-y-6 hidden">
       <div class="flex justify-between items-center">
         <div>
@@ -326,56 +360,14 @@
         </button>
       </div>
 
-      <div id="vehiclesList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- Loaded dynamically -->
-      </div>
+      <div id="vehiclesList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
 
       <div class="space-y-3">
         <div class="flex justify-between items-center">
           <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Garage Service & Fuel Logs</span>
           <button onclick="openServiceLogModal()" class="text-xs text-brand-400 font-semibold hover:underline">+ Log Repair/Service</button>
         </div>
-        <div id="vehicleLogsList" class="space-y-2">
-          <!-- Loaded dynamically -->
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 5: THE VAULT & CLINIC (DOCS & HEALTH) -->
-    <section id="tab-vault" class="tab-page space-y-6 hidden">
-      <div class="flex justify-between items-center">
-        <div>
-          <h2 class="text-lg font-bold text-white">The Vault & Clinic</h2>
-          <p class="text-xs text-slate-400">Identity documents, action tasks & recurring health doses</p>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="openDocModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
-            <i data-lucide="file-plus" class="w-3.5 h-3.5"></i> Add Doc
-          </button>
-          <button onclick="openHealthModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow">
-            <i data-lucide="activity" class="w-3.5 h-3.5"></i> Add Dose
-          </button>
-        </div>
-      </div>
-
-      <div class="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="pill" class="w-4 h-4 text-emerald-400"></i>
-          <h3 class="text-sm font-bold text-white">The Clinic (Recurring Medication Cycles)</h3>
-        </div>
-        <div id="healthCyclesList" class="space-y-2">
-          <!-- Loaded dynamically -->
-        </div>
-      </div>
-
-      <div class="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="file-text" class="w-4 h-4 text-indigo-400"></i>
-          <h3 class="text-sm font-bold text-white">The Vault (Documents & To-Do Action Items)</h3>
-        </div>
-        <div id="documentsList" class="space-y-2">
-          <!-- Loaded dynamically -->
-        </div>
+        <div id="vehicleLogsList" class="space-y-2"></div>
       </div>
     </section>
 
@@ -388,9 +380,9 @@
     </button>
   </div>
 
-  <!-- ================= BOTTOM NAVIGATION BAR (CLEAN 4-TAB LAYOUT) ================= -->
-  <nav class="fixed bottom-0 inset-x-0 bg-dark-bg/95 backdrop-blur-lg border-t border-dark-border z-30 px-4 py-2">
-    <div class="max-w-md mx-auto grid grid-cols-4 items-center justify-around text-center">
+  <!-- ================= BOTTOM NAVIGATION BAR ================= -->
+  <nav class="fixed bottom-0 inset-x-0 bg-dark-bg/95 backdrop-blur-lg border-t border-dark-border z-30 px-3 py-2">
+    <div class="max-w-md mx-auto grid grid-cols-5 items-center justify-around text-center">
       <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn flex flex-col items-center py-1 text-brand-400 font-semibold transition">
         <i data-lucide="layout-grid" class="w-5 h-5 mb-1"></i>
         <span class="text-[10px]">Dashboard</span>
@@ -399,6 +391,11 @@
       <button onclick="switchTab('finance')" id="nav-finance" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
         <i data-lucide="wallet" class="w-5 h-5 mb-1"></i>
         <span class="text-[10px]">Finance</span>
+      </button>
+
+      <button onclick="switchTab('todos')" id="nav-todos" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
+        <i data-lucide="check-square" class="w-5 h-5 mb-1"></i>
+        <span class="text-[10px]">To-Do</span>
       </button>
 
       <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn flex flex-col items-center py-1 text-slate-400 hover:text-slate-200 transition">
@@ -432,7 +429,7 @@
 
       <div class="text-center max-w-sm">
         <p id="aiStatusText" class="text-sm font-semibold text-slate-300 mb-1">Listening...</p>
-        <p id="aiSpeechTranscript" class="text-base font-bold text-white min-h-[48px]">"Say: I spent 2000 for petrol in XUV, odometer 12500"</p>
+        <p id="aiSpeechTranscript" class="text-base font-bold text-white min-h-[48px]">"Say: Add to-do call mechanic tomorrow"</p>
         <p id="aiReplyText" class="text-xs text-brand-300 mt-2 bg-dark-card/60 p-2.5 rounded-xl border border-dark-border hidden"></p>
       </div>
     </div>
@@ -608,7 +605,6 @@
         <div class="text-right flex flex-col items-end gap-1">
           <span class="text-[10px] text-slate-400 uppercase font-semibold">Current Balance</span>
           <span id="pbAccountBalance" class="text-lg font-extrabold text-emerald-400 leading-none">₹0</span>
-          <!-- Inside Edit & Delete Actions -->
           <div class="flex gap-2 mt-1">
             <button id="pbEditAccountBtn" class="text-[11px] text-brand-400 hover:text-brand-300 font-semibold flex items-center gap-1">
               <i data-lucide="edit" class="w-3 h-3"></i> Edit
@@ -629,7 +625,7 @@
     </div>
   </div>
 
-  <!-- 4. Account Modal (Create or Edit Account) -->
+  <!-- 4. Account Modal -->
   <div id="accountModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -785,93 +781,7 @@
     </div>
   </div>
 
-  <!-- 7. Health Dose Modal -->
-  <div id="healthModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="text-base font-bold text-white">Add Medication / Health Cycle</h3>
-        <button onclick="closeModal('healthModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <form id="healthForm" onsubmit="saveHealthCycle(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-400 mb-1">Medication / Health Item</label>
-          <input type="text" id="healthName" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. Albendazole (Deworming), Vitamin D3" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1">Last Taken Date</label>
-            <input type="date" id="healthLastDate" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Recurrence Cycle (Months)</label>
-            <input type="number" id="healthCycleMonths" value="6" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white font-bold focus:outline-none focus:border-brand-500" placeholder="e.g. 6" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 mb-1">Dosage / Notes</label>
-          <input type="text" id="healthNotes" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. 400mg chewable tablet after dinner" />
-        </div>
-
-        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20">
-          Save Health Cycle
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 8. Document & Task Modal -->
-  <div id="docModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="text-base font-bold text-white">Add Document & Linked Task</h3>
-        <button onclick="closeModal('docModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <form id="docForm" onsubmit="saveDocument(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block text-slate-400 mb-1">Document Title</label>
-          <input type="text" id="docTitle" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" placeholder="e.g. PAN Card, Voter ID, Car RC, Identity Card" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-slate-400 mb-1">Category</label>
-            <select id="docType" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500">
-              <option value="IDENTITY">Identity (Govt ID)</option>
-              <option value="VEHICLE">Vehicle (RC / Permit)</option>
-              <option value="PROPERTY">Property / Home</option>
-              <option value="FINANCE">Financial / Tax</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Expiry / Renewal Date</label>
-            <input type="date" id="docExpiry" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-white focus:outline-none focus:border-brand-500" />
-          </div>
-        </div>
-
-        <div class="p-3 bg-dark-bg rounded-xl border border-dark-border space-y-2">
-          <label class="flex items-center gap-2 font-bold text-white">
-            <input type="checkbox" id="docHasTask" onchange="toggleDocTaskFields()" class="rounded border-dark-border" />
-            Attach an Action / To-Do Task
-          </label>
-          <div id="docTaskDetailsContainer" class="hidden">
-            <label class="block text-slate-400 mb-1">Task Action Details</label>
-            <input type="text" id="docTaskDetails" class="w-full bg-dark-card border border-dark-border rounded-xl p-2 text-white" placeholder="e.g. Update new address online on portal" />
-          </div>
-        </div>
-
-        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
-          Save Document
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 9. Entity / Person Modal -->
+  <!-- 7. Entity / Person Modal -->
   <div id="entityModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
@@ -911,12 +821,12 @@
     </div>
   </div>
 
-  <!-- 10. Settings Modal -->
+  <!-- 8. Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-dark-card border border-dark-border rounded-3xl max-w-md w-full p-6 space-y-4">
       <div class="flex justify-between items-center">
         <div>
-          <h3 class="text-base font-bold text-white">System Settings</h3>
+          <h3 id="appSettingsVersionLabel" class="text-base font-bold text-white">System Settings</h3>
           <p class="text-[11px] text-slate-400">Application build & AI configurations</p>
         </div>
         <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -928,7 +838,7 @@
             <span class="font-bold text-white block">Application Version</span>
             <span class="text-[11px] text-slate-400">Chuvadi Build</span>
           </div>
-          <span class="text-xs font-mono font-bold text-brand-300 bg-brand-500/20 border border-brand-500/30 px-2 py-0.5 rounded" id="appSettingsVersion">v1.5.0</span>
+          <span class="text-xs font-mono font-bold text-brand-300 bg-brand-500/20 border border-brand-500/30 px-2 py-0.5 rounded" id="appSettingsVersion">v1.6.0</span>
         </div>
 
         <div>
@@ -967,7 +877,7 @@
     } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
     // Application Version
-    const APP_VERSION = "v1.5.0";
+    const APP_VERSION = "v1.6.0";
     document.getElementById('appHeaderVersion').innerText = APP_VERSION;
     document.getElementById('appSettingsVersion').innerText = APP_VERSION;
 
@@ -993,6 +903,7 @@
       entities: [],
       vehicles: [],
       vehicleLogs: [],
+      todos: [],
       healthCycles: [],
       documents: [],
       geminiKey: localStorage.getItem('chuvadi_gemini_key') || '',
@@ -1014,7 +925,6 @@
     document.getElementById('headerDate').innerText = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     document.getElementById('txnDate').valueAsDate = new Date();
     document.getElementById('logDate').valueAsDate = new Date();
-    document.getElementById('healthLastDate').valueAsDate = new Date();
 
     // ----------------------------------------------------
     // REAL-TIME FIRESTORE SUBSCRIPTIONS
@@ -1055,7 +965,13 @@
         renderExpenseReports();
       });
 
-      // 4. Vehicles
+      // 4. To-Do Notes (Keep Style)
+      onSnapshot(query(collection(db, "todos"), orderBy("createdAt", "desc")), (snap) => {
+        window.AppState.todos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderTodos();
+      });
+
+      // 5. Vehicles
       onSnapshot(collection(db, "vehicles"), (snap) => {
         window.AppState.vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderVehicles();
@@ -1063,24 +979,10 @@
         checkUrgentAlerts();
       });
 
-      // 5. Vehicle Logs
+      // 6. Vehicle Logs
       onSnapshot(query(collection(db, "vehicle_logs"), orderBy("date", "desc")), (snap) => {
         window.AppState.vehicleLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderVehicleLogs();
-      });
-
-      // 6. Health Cycles
-      onSnapshot(collection(db, "health_logs"), (snap) => {
-        window.AppState.healthCycles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderHealthCycles();
-        checkUrgentAlerts();
-      });
-
-      // 7. Documents & Tasks
-      onSnapshot(collection(db, "documents"), (snap) => {
-        window.AppState.documents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderDocuments();
-        checkUrgentAlerts();
       });
     }
 
@@ -1094,7 +996,7 @@
       window.AppState.accounts.forEach(acc => {
         const bal = Number(acc.balance) || 0;
         if (acc.type === 'BANK_ACCOUNT' || !acc.type) liquid += bal;
-        else if (acc.type === 'CREDIT_CARD') liquid -= bal; // Outstanding reduces liquid
+        else if (acc.type === 'CREDIT_CARD') liquid -= bal;
         else if (acc.type === 'RECEIVABLE_ACCOUNT') receivables += bal;
         else if (acc.type === 'INVESTMENT_PF' || acc.type === 'FIXED_ASSET') assets += bal;
       });
@@ -1135,32 +1037,6 @@
               desc: diffDays < 0 ? `Expired ${Math.abs(diffDays)} days ago!` : `Due in ${diffDays} days (${formatDate(v.insuranceExpiry)})`
             });
           }
-        }
-      });
-
-      window.AppState.healthCycles.forEach(h => {
-        if (h.nextDueDate) {
-          const due = new Date(h.nextDueDate);
-          const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-          if (diffDays <= 14) {
-            alerts.push({
-              icon: 'pill',
-              color: 'border-emerald-500 bg-emerald-500/10 text-emerald-300',
-              title: `${h.name} Dose Due`,
-              desc: diffDays <= 0 ? `Due now! (Last taken: ${formatDate(h.lastTakenDate)})` : `Due in ${diffDays} days (${formatDate(h.nextDueDate)})`
-            });
-          }
-        }
-      });
-
-      window.AppState.documents.forEach(d => {
-        if (d.hasTask && !d.taskCompleted) {
-          alerts.push({
-            icon: 'check-square',
-            color: 'border-brand-500 bg-brand-500/10 text-brand-300',
-            title: `Task: ${d.title}`,
-            desc: d.taskDetails || 'Pending update required'
-          });
         }
       });
 
@@ -1446,6 +1322,171 @@
     }
 
     // ----------------------------------------------------
+    // GOOGLE KEEP-STYLE TO-DO ENGINE (NEW)
+    // ----------------------------------------------------
+    window.addNewItemRowToCreator = function() {
+      const container = document.getElementById('newTodoItemsContainer');
+      const row = document.createElement('div');
+      row.className = "flex items-center gap-2 text-xs";
+      row.innerHTML = `
+        <i data-lucide="square" class="w-4 h-4 text-slate-500 shrink-0"></i>
+        <input type="text" class="new-todo-item-input flex-1 bg-dark-bg border border-dark-border rounded-xl px-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500" placeholder="List item..." onkeydown="handleTodoItemKeydown(event)" />
+        <button type="button" onclick="this.parentElement.remove()" class="text-slate-500 hover:text-rose-400 p-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+      `;
+      container.appendChild(row);
+      lucide.createIcons();
+      row.querySelector('input').focus();
+    };
+
+    window.handleTodoItemKeydown = function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addNewItemRowToCreator();
+      }
+    };
+
+    window.saveNewTodoNote = async function() {
+      const title = document.getElementById('newTodoTitle').value.trim() || 'Untitled List';
+      const itemInputs = document.querySelectorAll('.new-todo-item-input');
+      const items = [];
+
+      itemInputs.forEach(inp => {
+        const txt = inp.value.trim();
+        if (txt) {
+          items.push({
+            id: 'item_' + Math.random().toString(36).substring(2, 9),
+            text: txt,
+            done: false
+          });
+        }
+      });
+
+      if (items.length === 0) {
+        alert('Please add at least one to-do item.');
+        return;
+      }
+
+      await addDoc(collection(db, "todos"), {
+        title: title,
+        items: items,
+        createdAt: serverTimestamp()
+      });
+
+      document.getElementById('newTodoTitle').value = '';
+      document.getElementById('newTodoItemsContainer').innerHTML = `
+        <div class="flex items-center gap-2 text-xs">
+          <i data-lucide="square" class="w-4 h-4 text-slate-500 shrink-0"></i>
+          <input type="text" class="new-todo-item-input flex-1 bg-dark-bg border border-dark-border rounded-xl px-3 py-1.5 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500" placeholder="List item..." onkeydown="handleTodoItemKeydown(event)" />
+        </div>
+      `;
+      lucide.createIcons();
+    };
+
+    window.toggleTodoItem = async function(noteId, itemId) {
+      const note = window.AppState.todos.find(n => n.id === noteId);
+      if (!note) return;
+
+      const updatedItems = note.items.map(it => {
+        if (it.id === itemId) return { ...it, done: !it.done };
+        return it;
+      });
+
+      await updateDoc(doc(db, "todos", noteId), { items: updatedItems });
+    };
+
+    window.addQuickItemToExistingNote = async function(e, noteId) {
+      e.preventDefault();
+      const input = document.getElementById(`quickAddInput_${noteId}`);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const note = window.AppState.todos.find(n => n.id === noteId);
+      if (!note) return;
+
+      const newItem = {
+        id: 'item_' + Math.random().toString(36).substring(2, 9),
+        text: text,
+        done: false
+      };
+
+      await updateDoc(doc(db, "todos", noteId), {
+        items: [...(note.items || []), newItem]
+      });
+
+      input.value = '';
+    };
+
+    window.deleteTodoNote = async function(noteId) {
+      if (confirm('Delete this checklist note?')) {
+        await deleteDoc(doc(db, "todos", noteId));
+      }
+    };
+
+    function renderTodos() {
+      const container = document.getElementById('todosNotesGrid');
+      const countBadge = document.getElementById('todosCountBadge');
+      if (!container) return;
+
+      if (countBadge) countBadge.innerText = `${window.AppState.todos.length} notes`;
+
+      if (window.AppState.todos.length === 0) {
+        container.innerHTML = `<div class="col-span-2 text-center py-10 text-slate-500 text-xs bg-dark-card/50 rounded-2xl border border-dark-border/40">No to-do notes created. Use the note creator above to build your first checklist.</div>`;
+        return;
+      }
+
+      container.innerHTML = window.AppState.todos.map(note => {
+        const items = note.items || [];
+        const pendingItems = items.filter(it => !it.done);
+        const doneItems = items.filter(it => it.done);
+
+        return `
+          <div class="bg-dark-card border border-dark-border hover:border-brand-500/40 rounded-2xl p-4 shadow-sm space-y-3 flex flex-col justify-between transition">
+            <div class="space-y-2.5">
+              <div class="flex justify-between items-start">
+                <h4 class="font-bold text-sm text-white tracking-tight break-words pr-2">${note.title}</h4>
+                <button onclick="deleteTodoNote('${note.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+              </div>
+
+              <!-- Unchecked Checklist Items -->
+              <div class="space-y-1.5 text-xs">
+                ${pendingItems.map(it => `
+                  <div class="flex items-center gap-2 group/item">
+                    <button onclick="toggleTodoItem('${note.id}', '${it.id}')" class="text-slate-400 hover:text-brand-400 transition shrink-0">
+                      <i data-lucide="square" class="w-4 h-4"></i>
+                    </button>
+                    <span class="text-slate-200 leading-snug break-words flex-1">${it.text}</span>
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- Completed Checklist Items (Collapsible / Strike-through) -->
+              ${doneItems.length > 0 ? `
+                <div class="pt-2 border-t border-dark-border/40 space-y-1 text-xs">
+                  <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block">${doneItems.length} completed items</span>
+                  ${doneItems.map(it => `
+                    <div class="flex items-center gap-2 opacity-60">
+                      <button onclick="toggleTodoItem('${note.id}', '${it.id}')" class="text-emerald-400 transition shrink-0">
+                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                      </button>
+                      <span class="line-through text-slate-400 leading-snug break-words flex-1">${it.text}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Quick Add Item Field on Card -->
+            <form onsubmit="addQuickItemToExistingNote(event, '${note.id}')" class="pt-2 border-t border-dark-border/40 flex items-center gap-1.5">
+              <input type="text" id="quickAddInput_${note.id}" placeholder="+ Add item..." class="bg-dark-bg/60 border border-dark-border/60 rounded-lg px-2 py-1 text-[11px] text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 flex-1" />
+              <button type="submit" class="p-1 rounded-lg bg-dark-bg border border-dark-border text-slate-400 hover:text-white transition"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+            </form>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    // ----------------------------------------------------
     // EXPENSE REPORTS & EXPANDABLE ACCOUNTS BREAKDOWN
     // ----------------------------------------------------
     window.toggleAccountsSummaryAccordion = function() {
@@ -1466,7 +1507,6 @@
     };
 
     window.renderExpenseReports = function() {
-      // 1. Calculate & Render Expandable Accounts Summary
       let totalNetWorth = 0;
       const groupMap = {
         'Bank Accounts': [],
@@ -1481,7 +1521,7 @@
           totalNetWorth += bal;
           groupMap['Bank Accounts'].push({ name: acc.name, balance: bal, color: 'text-white' });
         } else if (acc.type === 'CREDIT_CARD') {
-          totalNetWorth -= bal; // Outstanding debt
+          totalNetWorth -= bal;
           groupMap['Credit Cards'].push({ name: acc.name, balance: bal, isDebt: true, color: 'text-amber-400' });
         } else if (acc.type === 'RECEIVABLE_ACCOUNT') {
           totalNetWorth += bal;
@@ -1523,7 +1563,6 @@
         `).join('');
       }
 
-      // 2. Calculate Period Expenses & Render Charts
       const period = document.getElementById('reportPeriodSelect')?.value || 'THIS_MONTH';
       const today = new Date();
       const currentYear = today.getFullYear();
@@ -1756,7 +1795,7 @@
     }
 
     // ----------------------------------------------------
-    // VEHICLES, HEALTH, VAULT RENDERING
+    // VEHICLES & LOGS RENDERING
     // ----------------------------------------------------
     function renderEntities() {
       const container = document.getElementById('entitiesList');
@@ -1841,63 +1880,6 @@
           </div>
         `;
       }).join('');
-      lucide.createIcons();
-    }
-
-    function renderHealthCycles() {
-      const container = document.getElementById('healthCyclesList');
-      if (window.AppState.healthCycles.length === 0) {
-        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">No recurring health doses added. Tap "+ Add Dose" to track items like Albendazole.</div>`;
-        return;
-      }
-      container.innerHTML = window.AppState.healthCycles.map(h => `
-        <div class="flex justify-between items-center p-3 bg-dark-bg rounded-xl border border-dark-border text-xs">
-          <div>
-            <span class="font-bold text-white block">${h.name}</span>
-            <span class="text-[11px] text-slate-400">Cycle: Every ${h.cycleMonths} Months • Last: ${formatDate(h.lastTakenDate)}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="text-right">
-              <span class="text-[10px] text-slate-400 block">Next Due</span>
-              <span class="font-bold text-emerald-400">${formatDate(h.nextDueDate)}</span>
-            </div>
-            <button onclick="markDoseTaken('${h.id}')" class="px-2.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-lg text-[11px] font-semibold">
-              Take Now
-            </button>
-          </div>
-        </div>
-      `).join('');
-      lucide.createIcons();
-    }
-
-    function renderDocuments() {
-      const container = document.getElementById('documentsList');
-      if (window.AppState.documents.length === 0) {
-        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs">No documents stored. Tap "+ Add Doc" to track PAN, Voter ID, Aadhaar tasks, etc.</div>`;
-        return;
-      }
-      container.innerHTML = window.AppState.documents.map(d => `
-        <div class="p-3 bg-dark-bg rounded-xl border border-dark-border text-xs space-y-2">
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="font-bold text-white flex items-center gap-1.5">
-                <i data-lucide="file-check" class="w-3.5 h-3.5 text-indigo-400"></i>
-                ${d.title}
-              </span>
-              <span class="text-[11px] text-slate-400">${d.type} ${d.expiryDate ? '• Expiry: ' + formatDate(d.expiryDate) : ''}</span>
-            </div>
-            <button onclick="deleteDocItem('documents', '${d.id}')" class="text-slate-500 hover:text-rose-400"><i data-lucide="trash" class="w-3.5 h-3.5"></i></button>
-          </div>
-          ${d.hasTask ? `
-            <div class="flex items-center justify-between pt-2 border-t border-dark-border/40 text-[11px]">
-              <label class="flex items-center gap-2 text-slate-300">
-                <input type="checkbox" ${d.taskCompleted ? 'checked' : ''} onchange="toggleTaskStatus('${d.id}', this.checked)" class="rounded border-dark-border" />
-                <span class="${d.taskCompleted ? 'line-through text-slate-500' : 'text-brand-300 font-medium'}">${d.taskDetails || 'Task'}</span>
-              </label>
-            </div>
-          ` : ''}
-        </div>
-      `).join('');
       lucide.createIcons();
     }
 
@@ -2205,57 +2187,6 @@
       document.getElementById('serviceLogForm').reset();
     };
 
-    window.saveHealthCycle = async function(e) {
-      e.preventDefault();
-      const lastDate = new Date(document.getElementById('healthLastDate').value);
-      const months = parseInt(document.getElementById('healthCycleMonths').value) || 6;
-      const nextDate = new Date(lastDate);
-      nextDate.setMonth(nextDate.getMonth() + months);
-
-      await addDoc(collection(db, "health_logs"), {
-        name: document.getElementById('healthName').value,
-        cycleMonths: months,
-        lastTakenDate: document.getElementById('healthLastDate').value,
-        nextDueDate: nextDate.toISOString().split('T')[0],
-        notes: document.getElementById('healthNotes').value,
-        createdAt: serverTimestamp()
-      });
-      closeModal('healthModal');
-      document.getElementById('healthForm').reset();
-    };
-
-    window.markDoseTaken = async function(id) {
-      const h = window.AppState.healthCycles.find(item => item.id === id);
-      if (!h) return;
-      const today = new Date();
-      const nextDate = new Date(today);
-      nextDate.setMonth(nextDate.getMonth() + (h.cycleMonths || 6));
-
-      await updateDoc(doc(db, "health_logs", id), {
-        lastTakenDate: today.toISOString().split('T')[0],
-        nextDueDate: nextDate.toISOString().split('T')[0]
-      });
-    };
-
-    window.saveDocument = async function(e) {
-      e.preventDefault();
-      await addDoc(collection(db, "documents"), {
-        title: document.getElementById('docTitle').value,
-        type: document.getElementById('docType').value,
-        expiryDate: document.getElementById('docExpiry').value || null,
-        hasTask: document.getElementById('docHasTask').checked,
-        taskDetails: document.getElementById('docTaskDetails').value,
-        taskCompleted: false,
-        createdAt: serverTimestamp()
-      });
-      closeModal('docModal');
-      document.getElementById('docForm').reset();
-    };
-
-    window.toggleTaskStatus = async function(id, completed) {
-      await updateDoc(doc(db, "documents", id), { taskCompleted: completed });
-    };
-
     window.saveEntity = async function(e) {
       e.preventDefault();
       await addDoc(collection(db, "receivables_payables"), {
@@ -2346,17 +2277,17 @@ Current Data:
 - Bank Accounts: ${JSON.stringify(window.AppState.accounts.map(a => ({ id: a.id, name: a.name, balance: a.balance })))}
 - Receivables: ${JSON.stringify(window.AppState.entities.map(e => ({ name: e.name, amount: e.amount })))}
 - Vehicles: ${JSON.stringify(window.AppState.vehicles.map(v => ({ id: v.id, name: v.name, insuranceDue: v.insuranceExpiry, odo: v.currentOdometer })))}
-- Health: ${JSON.stringify(window.AppState.healthCycles.map(h => ({ name: h.name, nextDue: h.nextDueDate })))}
 
 Return JSON ONLY:
 {
-  "action": "LOG_EXPENSE" | "LOG_FUEL" | "ANSWER_QUERY",
+  "action": "LOG_EXPENSE" | "LOG_FUEL" | "ADD_TODO" | "ANSWER_QUERY",
   "data": {
     "amount": number,
     "category": string,
     "vehicleName": string,
     "odometer": number,
-    "liters": number
+    "todoTitle": string,
+    "todoItem": string
   },
   "speechReply": "Conversational reply"
 }`;
@@ -2398,6 +2329,16 @@ Return JSON ONLY:
               createdAt: serverTimestamp()
             });
           }
+        } else if (parsed.action === 'ADD_TODO') {
+          await addDoc(collection(db, "todos"), {
+            title: parsed.data.todoTitle || 'Voice Note',
+            items: [{
+              id: 'item_' + Math.random().toString(36).substring(2, 9),
+              text: parsed.data.todoItem || userPrompt,
+              done: false
+            }],
+            createdAt: serverTimestamp()
+          });
         }
 
         replyBox.innerText = parsed.speechReply || "Task executed.";
@@ -2427,6 +2368,8 @@ Return JSON ONLY:
 
       if (tabId === 'reports') {
         renderExpenseReports();
+      } else if (tabId === 'todos') {
+        renderTodos();
       }
     };
 
@@ -2482,13 +2425,6 @@ Return JSON ONLY:
 
     window.openVehicleModal = function() { openModal('vehicleModal'); };
     window.openServiceLogModal = function() { openModal('serviceLogModal'); };
-    window.openQuickFuelModal = function() { 
-      document.getElementById('logType').value = 'FUEL';
-      toggleLogTypeFields();
-      openModal('serviceLogModal'); 
-    };
-    window.openHealthModal = function() { openModal('healthModal'); };
-    window.openDocModal = function() { openModal('docModal'); };
     window.openEntityModal = function() { openModal('entityModal'); };
     window.openSettingsModal = function() { 
       document.getElementById('geminiApiKeyInput').value = window.AppState.geminiKey;
@@ -2506,10 +2442,6 @@ Return JSON ONLY:
     window.toggleLogTypeFields = function() {
       const type = document.getElementById('logType').value;
       document.getElementById('fuelLitersContainer').classList.toggle('hidden', type !== 'FUEL');
-    };
-    window.toggleDocTaskFields = function() {
-      const checked = document.getElementById('docHasTask').checked;
-      document.getElementById('docTaskDetailsContainer').classList.toggle('hidden', !checked);
     };
 
     // Initialize App & Real-time Listeners
